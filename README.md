@@ -277,32 +277,98 @@ The application currently includes:
 
 # Project Structure
 
-The project follows a clean MVC-inspired folder organization:
+The project follows a clean full-stack, MVC-inspired folder organization separating the database, public assets, routes, automated tests, EJS views, administrative tools, configuration files, and application logic.
 
-```
+```text
 excavation-website/
 │
 ├── database/
+│   └── bower_company.db
+│
+├── node_modules/
+│
 ├── public/
+│   │
 │   ├── css/
+│   │   ├── BigBullRon.css
+│   │   └── home.css
+│   │
 │   ├── images/
-│   └── js/
+│   │   ├── hero_page.png
+│   │   ├── image_1.jpg
+│   │   ├── image_2.png
+│   │   ├── image_3.png
+│   │   ├── image_4.png
+│   │   └── Logo.png
+│   │
+│   ├── js/
+│   │   └── main.js
+│   │
+│   └── google58598e67e8a0915c.html
 │
 ├── routes/
-├── test/
-├── views/
-│   ├── admin/
-│   └── partials/
+│   ├── contact.js
+│   └── services.js
 │
-├── app.js
-├── package.json
-├── package-lock.json
+├── test/
+│   ├── app.test.js
+│   └── database.test.js
+│
+├── views/
+│   │
+│   ├── admin/
+│   │   ├── big_bull_ron_recover.ejs
+│   │   └── big_bull_ron.ejs
+│   │
+│   ├── partials/
+│   │   ├── body.ejs
+│   │   ├── footer.ejs
+│   │   ├── gallery.ejs
+│   │   ├── header.ejs
+│   │   ├── hero.ejs
+│   │   ├── navbar.ejs
+│   │   └── scripts.ejs
+│   │
+│   ├── contact.ejs
+│   ├── home.ejs
+│   └── services.ejs
+│
 ├── .env
+├── .gitignore
+├── app.js
+├── database.js
+├── package-lock.json
+├── package.json
+├── Push to GitHub test 4
 └── README.md
 ```
 
-# Deployment
+## Structure Overview
 
-The application is deployed using **Render**, with source control managed through **GitHub**. Every deployment is version controlled and automatically built from the GitHub repository. Environment variables are securely managed outside the codebase, and the application has been configured for cloud deployment using Node.js, Express, SQLite, and Render's hosting infrastructure.
+The `database` directory contains the SQLite database used to store customer quote requests, response status information, deleted request records, recovery information, and other Big Bull RON customer-management data.
 
-The project is also verified through **Google Search Console**, allowing Google to properly index the website and monitor search performance, coverage, and SEO health over time.
+The `public` directory contains all files that are served directly to the browser, including CSS stylesheets, JavaScript, website photographs, the Bower Company logo, and the Google Search Console HTML verification file.
+
+The `routes` directory contains modular Express route files used to separate application routing responsibilities such as contact and service-related requests.
+
+The `test` directory contains the automated Jest and Supertest test suites. `app.test.js` tests the Express application and routes, while `database.test.js` tests customer creation, retrieval, response status, deletion, restoration, counters, and the complete Big Bull RON recovery workflow.
+
+The `views` directory contains the EJS frontend templates used to generate the website. Public pages include the home, contact, and services views.
+
+The `views/admin` directory contains the Big Bull RON administrative dashboard and deleted-request recovery interface.
+
+The `views/partials` directory contains reusable EJS components including the header, navigation bar, hero section, body content, gallery, footer, and JavaScript includes.
+
+`app.js` is the main Express application and contains the application's middleware, page routing, customer submission processing, Big Bull RON routes, email integration, error handling, and server startup configuration.
+
+`database.js` provides the SQLite database layer and contains the functions responsible for creating, reading, updating, soft-deleting, restoring, and counting customer requests.
+
+`package.json` defines the Node.js application, production dependencies, development dependencies, Node version, startup commands, and automated testing commands. `package-lock.json` locks the exact dependency versions used by the application for reproducible installations and deployments.
+
+`.env` contains private local environment configuration such as API credentials and business configuration and is excluded from GitHub through `.gitignore`. The `.gitignore` file also prevents `node_modules` and other local development files from being committed to the repository.
+
+The Google verification HTML file inside `public` is used by Google Search Console to verify ownership of the deployed Bower Company website.
+
+`Push to GitHub test 4` is a personal deployment-tracking file. It has no effect on the application and is used only to verify that new commits and pushes successfully reach the GitHub repository.
+
+`README.md` documents the complete Bower Excavation Services project, including its services, frontend, backend, database, administrative dashboard, email integration, SEO configuration, testing system, deployment process, and project architecture.gh **Google Search Console**, allowing Google to properly index the website and monitor search performance, coverage, and SEO health over time.
