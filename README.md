@@ -4,7 +4,7 @@ Professional excavation and land improvement services website for **Bower Compan
 
 This project is a full-stack web application built to showcase excavation services, provide customers with project information, and allow potential clients to submit service requests.
 
-![Bower Excavation Services](public/images/hero_page.JPG)
+
 
 
 ## About The Project
