@@ -1,0 +1,151 @@
+<%- include("partials/header") %>
+
+<%- include("partials/navbar") %>
+
+
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <h1 class="display-4 fw-bold">
+            Contact Bauer Company Construction
+        </h1>
+
+        <p class="lead">
+            Contact us for excavation, land clearing, weed abatement,
+            concrete breaking, and site preparation services.
+        </p>
+
+    </div>
+
+
+
+    <div class="row">
+
+        <!-- Contact Information -->
+        <div class="col-md-6">
+
+            <h2>
+                Get In Touch
+            </h2>
+
+
+            <p>
+                <strong>Company:</strong><br>
+                Bauer Company Construction
+            </p>
+
+
+            <p>
+                <strong>Address:</strong><br>
+                2486 Warren Lane<br>
+                Walnut Creek, California
+            </p>
+
+
+            <p>
+                <strong>Phone:</strong><br>
+                <a href="tel:9162064059">
+                    916-206-4059
+                </a>
+            </p>
+
+
+            <p>
+                <strong>Email:</strong><br>
+                <a href="mailto:rbauercompany@gmail.com">
+                    rbauercompany@gmail.com
+                </a>
+            </p>
+
+
+            <p>
+                <strong>Service Hours:</strong><br>
+                Monday - Sunday<br>
+                5:00 AM - 9:00 PM
+            </p>
+
+
+        </div>
+
+
+
+        <!-- Contact Form -->
+        <div class="col-md-6">
+
+
+            <h2>
+                Request A Quote
+            </h2>
+
+
+            <form action="/contact" method="POST">
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Name
+                    </label>
+
+                    <input 
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    required>
+
+                </div>
+
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input 
+                    type="email"
+                    class="form-control"
+                    name="email"
+                    required>
+
+                </div>
+
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Message
+                    </label>
+
+                    <textarea
+                    class="form-control"
+                    name="message"
+                    rows="5"
+                    required></textarea>
+
+                </div>
+
+
+
+                <button class="btn btn-warning">
+                    Send Request
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<%- include("partials/footer") %>
+
+<%- include("partials/scripts") %>

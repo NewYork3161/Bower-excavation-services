@@ -1,0 +1,35 @@
+{
+  "name": "excavation-website",
+  "version": "1.0.0",
+  "description": "Professional excavation and land services website built with Express, EJS, and SQLite.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "excavation",
+    "construction",
+    "land-clearing",
+    "weed-abatement",
+    "express",
+    "ejs",
+    "sqlite"
+  ],
+  "author": "Bauer Company Construction",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.x"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "method-override": "^3.0.0",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
