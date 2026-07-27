@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+
+    <!-- =====================================================
+         MOBILE / RESPONSIVE
+    ====================================================== -->
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+
+    <!-- =====================================================
+         BOWER COMPANY SEO
+         WALNUT CREEK / CONTRA COSTA COUNTY
+    ====================================================== -->
+
+    <title>
+        Disking & Weed Abatement Walnut Creek CA | Bower Company
+    </title>
+
+
+    <meta
+        name="description"
+        content="Bower Company provides professional disking, fire disking, weed abatement, fire prevention, vegetation clearing, brush clearing, excavation, drilling, mulching, and land clearing services in Walnut Creek, California and surrounding Contra Costa County areas.">
+
+
+    <meta
+        name="keywords"
+        content="disking Walnut Creek, weed abatement Walnut Creek, fire disking Walnut Creek, fire weed abatement Walnut Creek, weed clearing Walnut Creek, vegetation clearing Walnut Creek, brush clearing Walnut Creek, fire prevention Walnut Creek, land clearing Walnut Creek, excavation Walnut Creek, excavator services Walnut Creek, drilling Walnut Creek, mulching Walnut Creek, property clearing Walnut Creek, lot clearing Walnut Creek, field disking Walnut Creek, tractor disking Walnut Creek, vegetation management Walnut Creek, fire fuel reduction Walnut Creek, defensible space Walnut Creek, disking Contra Costa County, weed abatement Contra Costa County, fire prevention Contra Costa County, excavation Contra Costa County, land clearing Contra Costa County, Bower Company">
+
+
+    <meta
+        name="author"
+        content="Bower Company">
+
+
+    <meta
+        name="robots"
+        content="index, follow">
+
+
+    <!-- =====================================================
+         LOCAL BUSINESS / LOCATION SEO
+    ====================================================== -->
+
+    <meta
+        name="geo.region"
+        content="US-CA">
+
+    <meta
+        name="geo.placename"
+        content="Walnut Creek, California">
+
+
+    <!-- =====================================================
+         SOCIAL MEDIA / SEARCH PREVIEW
+    ====================================================== -->
+
+    <meta
+        property="og:title"
+        content="Disking & Weed Abatement Services | Bower Company | Walnut Creek CA">
+
+    <meta
+        property="og:description"
+        content="Professional disking, fire weed abatement, vegetation clearing, brush clearing, excavation, drilling, mulching, and land clearing services in Walnut Creek and Contra Costa County, California.">
+
+    <meta
+        property="og:type"
+        content="website">
+
+    <meta
+        property="og:locale"
+        content="en_US">
+
+    <meta
+        property="og:image"
+        content="/images/Logo.png">
+
+
+    <!-- =====================================================
+         BROWSER TAB LOGO / FAVICON
+    ====================================================== -->
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/images/Logo.png">
+
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/images/Logo.png">
+
+
+    <!-- =====================================================
+         BIG BULL RON CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/BigBullRon.css">
+
+</head>
+
+<body>
+
+
+    <!-- =====================================================
+         BIG BULL RON NAVBAR
+    ====================================================== -->
+
+    <nav class="ron-navbar">
+
+        <h1>
+            BIG BULL RON
+        </h1>
+
+        <div class="ron-navbar-status">
+
+            Deleted Requests
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+    ====================================================== -->
+
+    <main class="ron-dashboard">
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <div class="ron-header">
+
+            <h2>
+                Recover Deleted Requests
+            </h2>
+
+            <p>
+                Restore customer requests that were previously deleted.
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             BACK TO BIG BULL RON
+        ================================================== -->
+
+        <div class="ron-recovery-navigation">
+
+            <a
+                href="/BigBullRON"
+                class="ron-back-button">
+
+                ← Back to Customer Requests
+
+            </a>
+
+        </div>
+
+
+
+        <!-- =================================================
+             NO DELETED REQUESTS
+        ================================================== -->
+
+        <% if (!deletedSubmissions || deletedSubmissions.length === 0) { %>
+
+
+            <div class="ron-empty">
+
+                <h2>
+                    No Deleted Requests
+                </h2>
+
+                <p>
+                    Deleted customer requests will appear here
+                    until they are restored.
+                </p>
+
+            </div>
+
+
+        <% } else { %>
+
+
+
+            <!-- =================================================
+                 DELETED CUSTOMER REQUESTS
+            ================================================== -->
+
+            <% deletedSubmissions.forEach(submission => { %>
+
+
+                <div class="ron-card ron-deleted-card">
+
+
+                    <!-- =========================================
+                         CUSTOMER NAME
+                    ========================================== -->
+
+                    <div class="ron-card-header">
+
+
+                        <h2>
+                            <%= submission.name || "Unknown Customer" %>
+                        </h2>
+
+
+                        <span class="ron-status ron-status-deleted">
+
+                            Deleted
+
+                        </span>
+
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         CUSTOMER INFORMATION
+                    ========================================== -->
+
+                    <div class="ron-info-grid">
+
+
+                        <!-- =====================================
+                             EMAIL
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Email
+                            </span>
+
+                            <div class="ron-value">
+
+                                <% if (submission.email) { %>
+
+                                    <a
+                                        href="mailto:<%= submission.email %>">
+
+                                        <%= submission.email %>
+
+                                    </a>
+
+                                <% } else { %>
+
+                                    Not provided
+
+                                <% } %>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =====================================
+                             PHONE
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Phone
+                            </span>
+
+                            <div class="ron-value">
+
+                                <% if (submission.phone) { %>
+
+                                    <a
+                                        href="tel:<%= submission.phone %>">
+
+                                        <%= submission.phone %>
+
+                                    </a>
+
+                                <% } else { %>
+
+                                    Not provided
+
+                                <% } %>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =====================================
+                             SERVICE
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Service
+                            </span>
+
+                            <div class="ron-value">
+
+                                <%= submission.service || "Not provided" %>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =====================================
+                             PROPERTY ADDRESS
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Property Address
+                            </span>
+
+                            <div class="ron-value">
+
+                                <%= submission.propertyAddress || submission.property_address || "Not provided" %>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         CUSTOMER MESSAGE
+                    ========================================== -->
+
+                    <div class="ron-message">
+
+                        <p class="ron-message-label">
+
+                            Customer Message
+
+                        </p>
+
+                        <p class="ron-message-text"><%= submission.message || "No message provided." %></p>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         DELETED DATE
+                    ========================================== -->
+
+                    <% if (submission.deleted_at) { %>
+
+                        <div class="ron-deleted-information">
+
+                            <span class="ron-label">
+
+                                Deleted
+
+                            </span>
+
+                            <div class="ron-value">
+
+                                <%= submission.deleted_at %>
+
+                            </div>
+
+                        </div>
+
+                    <% } %>
+
+
+
+                    <!-- =========================================
+                         RESTORE REQUEST
+                    ========================================== -->
+
+                    <div class="ron-recovery-actions">
+
+
+                        <form
+                            method="POST"
+                            action="/BigBullRON/restore/<%= submission.id %>">
+
+
+                            <button
+                                type="submit"
+                                class="ron-restore-button">
+
+                                Restore Request
+
+                            </button>
+
+
+                        </form>
+
+
+                    </div>
+
+
+                </div>
+
+
+            <% }) %>
+
+
+        <% } %>
+
+
+    </main>
+
+
+</body>
+
+</html>

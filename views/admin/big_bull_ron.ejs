@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+
+    <!-- =====================================================
+         MOBILE / RESPONSIVE
+    ====================================================== -->
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+
+    <!-- =====================================================
+         BOWER COMPANY SEO
+         DISKING / WEED ABATEMENT / LAND SERVICES
+    ====================================================== -->
+
+    <title>
+        Fire Disking & Weed Abatement Walnut Creek CA | Bower Company
+    </title>
+
+
+    <meta
+        name="description"
+        content="Bower Company provides fire disking, weed abatement, excavation, vegetation management, brush removal, drilling, mulching, land clearing, lot clearing, and fire prevention services throughout Walnut Creek and Contra Costa County, California.">
+
+
+    <meta
+        name="keywords"
+        content="fire disking Walnut Creek, disking services Walnut Creek, weed abatement Walnut Creek, fire weed abatement Walnut Creek, weed removal Walnut Creek, excavation Walnut Creek, excavator Walnut Creek, drilling services Walnut Creek, land clearing Walnut Creek, lot clearing Walnut Creek, brush removal Walnut Creek, brush clearing Walnut Creek, vegetation removal Walnut Creek, vegetation management Walnut Creek, mulching services Walnut Creek, field clearing Walnut Creek, property clearing Walnut Creek, tractor disking Walnut Creek, fire prevention Walnut Creek, fire fuel reduction Walnut Creek, defensible space Walnut Creek, fire hazard reduction Walnut Creek, land services Walnut Creek, disking Contra Costa County, weed abatement Contra Costa County, excavation Contra Costa County, vegetation clearing Contra Costa County, Bower Company">
+
+
+    <meta
+        name="author"
+        content="Bower Company">
+
+
+    <!-- =====================================================
+         SEARCH ENGINE INDEXING
+    ====================================================== -->
+
+    <meta
+        name="robots"
+        content="index, follow">
+
+
+    <!-- =====================================================
+         LOCAL WALNUT CREEK SEO
+    ====================================================== -->
+
+    <meta
+        name="geo.region"
+        content="US-CA">
+
+    <meta
+        name="geo.placename"
+        content="Walnut Creek, California">
+
+
+    <!-- =====================================================
+         SOCIAL / SEARCH PREVIEW
+    ====================================================== -->
+
+    <meta
+        property="og:title"
+        content="Fire Disking & Weed Abatement | Bower Company | Walnut Creek CA">
+
+    <meta
+        property="og:description"
+        content="Disking, weed abatement, excavation, drilling, brush clearing, vegetation management, mulching, fire prevention, and land clearing services in Walnut Creek and Contra Costa County.">
+
+    <meta
+        property="og:type"
+        content="website">
+
+    <meta
+        property="og:locale"
+        content="en_US">
+
+    <meta
+        property="og:image"
+        content="/images/Logo.png">
+
+
+    <!-- =====================================================
+         BOWER COMPANY LOGO / BROWSER TAB ICON
+    ====================================================== -->
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/images/Logo.png">
+
+    <link
+        rel="shortcut icon"
+        type="image/png"
+        href="/images/Logo.png">
+
+
+    <!-- =====================================================
+         BIG BULL RON CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/BigBullRon.css">
+
+</head>
+
+<body>
+
+
+    <!-- =====================================================
+         BIG BULL RON NAVBAR
+    ====================================================== -->
+
+    <nav class="ron-navbar">
+
+
+        <!-- =================================================
+             TITLE
+        ================================================== -->
+
+        <h1>
+            BIG BULL RON
+        </h1>
+
+
+        <!-- =================================================
+             NAVBAR RIGHT SIDE
+        ================================================== -->
+
+        <div class="ron-navbar-right">
+
+
+            <!-- =============================================
+                 NEW REQUEST COUNT
+            ============================================== -->
+
+            <div class="ron-navbar-status">
+
+                <% if (typeof unansweredCount !== "undefined") { %>
+
+                    <%= unansweredCount %>
+                    New Request<%= unansweredCount === 1 ? "" : "s" %>
+
+                <% } else { %>
+
+                    Customer Requests
+
+                <% } %>
+
+            </div>
+
+
+
+            <!-- =============================================
+                 HAMBURGER MENU
+            ============================================== -->
+
+            <div class="ron-menu">
+
+
+                <!-- =========================================
+                     HAMBURGER BUTTON
+                ========================================== -->
+
+                <button
+                    type="button"
+                    class="ron-menu-button"
+                    id="ronMenuButton"
+                    aria-label="Open menu"
+                    aria-expanded="false">
+
+                    <span class="ron-menu-line"></span>
+                    <span class="ron-menu-line"></span>
+                    <span class="ron-menu-line"></span>
+
+                </button>
+
+
+                <!-- =========================================
+                     DROPDOWN
+                ========================================== -->
+
+                <div
+                    class="ron-menu-dropdown"
+                    id="ronMenuDropdown">
+
+
+                    <!-- =====================================
+                         RECOVER DELETED FILES
+                    ====================================== -->
+
+                    <a
+                        href="/BigBullRON/recover"
+                        class="ron-menu-link">
+
+                        Recover Deleted Files
+
+                        <% if (
+                            typeof deletedCount !== "undefined" &&
+                            deletedCount > 0
+                        ) { %>
+
+                            <span class="ron-deleted-count">
+
+                                <%= deletedCount %>
+
+                            </span>
+
+                        <% } %>
+
+                    </a>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+    ====================================================== -->
+
+    <main class="ron-dashboard">
+
+
+        <!-- =================================================
+             DASHBOARD HEADER
+        ================================================== -->
+
+        <div class="ron-header">
+
+            <h2>
+                Customer Requests
+            </h2>
+
+            <p>
+                View customer information and respond directly
+                through Gmail.
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             NO SUBMISSIONS
+        ================================================== -->
+
+        <% if (!submissions || submissions.length === 0) { %>
+
+
+            <div class="ron-empty">
+
+                <h2>
+                    No Customer Requests
+                </h2>
+
+                <p>
+                    New customer requests will appear here.
+                </p>
+
+            </div>
+
+
+        <% } else { %>
+
+
+
+            <!-- =================================================
+                 CUSTOMER REQUESTS
+            ================================================== -->
+
+            <% submissions.forEach(submission => { %>
+
+
+                <div class="ron-card">
+
+
+                    <!-- =========================================
+                         CUSTOMER NAME + STATUS
+                    ========================================== -->
+
+                    <div class="ron-card-header">
+
+
+                        <h2>
+                            <%= submission.name || "Unknown Customer" %>
+                        </h2>
+
+
+                        <% if (submission.responded) { %>
+
+                            <span class="ron-status ron-status-responded">
+
+                                ✓ Responded
+
+                            </span>
+
+                        <% } else { %>
+
+                            <span class="ron-status ron-status-new">
+
+                                New Request
+
+                            </span>
+
+                        <% } %>
+
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         CUSTOMER INFORMATION
+                    ========================================== -->
+
+                    <div class="ron-info-grid">
+
+
+                        <!-- =====================================
+                             EMAIL
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Email
+                            </span>
+
+                            <div class="ron-value">
+
+                                <% if (submission.email) { %>
+
+                                    <a
+                                        href="mailto:<%= submission.email %>">
+
+                                        <%= submission.email %>
+
+                                    </a>
+
+                                <% } else { %>
+
+                                    Not provided
+
+                                <% } %>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =====================================
+                             PHONE
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Phone
+                            </span>
+
+                            <div class="ron-value">
+
+                                <% if (submission.phone) { %>
+
+                                    <a
+                                        href="tel:<%= submission.phone %>">
+
+                                        <%= submission.phone %>
+
+                                    </a>
+
+                                <% } else { %>
+
+                                    Not provided
+
+                                <% } %>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =====================================
+                             SERVICE
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Service
+                            </span>
+
+                            <div class="ron-value">
+
+                                <%= submission.service || "Not provided" %>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =====================================
+                             PROPERTY ADDRESS
+                        ====================================== -->
+
+                        <div class="ron-info">
+
+                            <span class="ron-label">
+                                Property Address
+                            </span>
+
+                            <div class="ron-value">
+
+                                <%=
+                                    submission.propertyAddress ||
+                                    submission.property_address ||
+                                    "Not provided"
+                                %>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         CUSTOMER MESSAGE
+                    ========================================== -->
+
+                    <div class="ron-message">
+
+                        <p class="ron-message-label">
+
+                            Customer Message
+
+                        </p>
+
+                        <p class="ron-message-text"><%= submission.message || "No message provided." %></p>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         RESPOND TO CUSTOMER
+                    ========================================== -->
+
+                    <div class="ron-response">
+
+                        <h3>
+                            Respond to Customer
+                        </h3>
+
+
+                        <% if (submission.email) { %>
+
+
+                            <!-- =================================
+                                 CUSTOMER EMAIL
+                            ================================== -->
+
+                            <div class="ron-response-email">
+
+                                <span class="ron-label">
+
+                                    Email Response To
+
+                                </span>
+
+                                <div class="ron-value">
+
+                                    <%= submission.email %>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- =================================
+                                 OPEN GMAIL BUTTON
+                            ================================== -->
+
+                            <a
+                                class="ron-send-button"
+                                href="https://mail.google.com/mail/?view=cm&fs=1&to=<%= encodeURIComponent(submission.email) %>&su=<%= encodeURIComponent('Bower Company - Response to Your Request') %>&body=<%= encodeURIComponent('Hello ' + (submission.name || '') + ',\n\nThank you for contacting Bower Company regarding your ' + (submission.service || 'service') + ' request.\n\n') %>"
+                                target="_blank"
+                                rel="noopener noreferrer">
+
+                                Send Response
+
+                            </a>
+
+
+                        <% } else { %>
+
+
+                            <!-- =================================
+                                 NO EMAIL ADDRESS
+                            ================================== -->
+
+                            <div class="ron-completed">
+
+                                No customer email address was provided.
+
+                            </div>
+
+
+                        <% } %>
+
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         CARD ACTIONS
+                    ========================================== -->
+
+                    <div class="ron-card-actions">
+
+
+                        <!-- =====================================
+                             DELETE CUSTOMER REQUEST
+                        ====================================== -->
+
+                        <form
+                            method="POST"
+                            action="/BigBullRON/delete/<%= submission.id %>"
+                            class="ron-delete-form"
+                            onsubmit="return confirm('Move this customer request to Recover Deleted Files?');">
+
+
+                            <button
+                                type="submit"
+                                class="ron-delete-button"
+                                title="Delete customer request"
+                                aria-label="Delete customer request">
+
+                                ×
+
+                            </button>
+
+
+                        </form>
+
+
+                    </div>
+
+
+                </div>
+
+
+            <% }) %>
+
+
+        <% } %>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         BIG BULL RON JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+        // =====================================================
+        // HAMBURGER MENU
+        // =====================================================
+
+        const ronMenuButton =
+            document.getElementById(
+                "ronMenuButton"
+            );
+
+
+        const ronMenuDropdown =
+            document.getElementById(
+                "ronMenuDropdown"
+            );
+
+
+        // =====================================================
+        // OPEN / CLOSE MENU
+        // =====================================================
+
+        if (
+            ronMenuButton &&
+            ronMenuDropdown
+        ) {
+
+            ronMenuButton.addEventListener(
+                "click",
+                function (event) {
+
+                    event.stopPropagation();
+
+
+                    const menuIsOpen =
+                        ronMenuDropdown
+                            .classList
+                            .toggle(
+                                "ron-menu-open"
+                            );
+
+
+                    ronMenuButton.setAttribute(
+                        "aria-expanded",
+                        menuIsOpen
+                            ? "true"
+                            : "false"
+                    );
+
+                }
+            );
+
+
+            // =================================================
+            // CLOSE MENU WHEN CLICKING OUTSIDE
+            // =================================================
+
+            document.addEventListener(
+                "click",
+                function (event) {
+
+                    if (
+                        !ronMenuDropdown.contains(event.target) &&
+                        !ronMenuButton.contains(event.target)
+                    ) {
+
+                        ronMenuDropdown
+                            .classList
+                            .remove(
+                                "ron-menu-open"
+                            );
+
+
+                        ronMenuButton.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+
+                    }
+
+                }
+            );
+
+
+            // =================================================
+            // CLOSE MENU WITH ESCAPE KEY
+            // =================================================
+
+            document.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (event.key === "Escape") {
+
+                        ronMenuDropdown
+                            .classList
+                            .remove(
+                                "ron-menu-open"
+                            );
+
+
+                        ronMenuButton.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

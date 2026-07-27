@@ -1,45 +1,117 @@
+<!-- =====================================================
+     BOWER COMPANY
+     HERO SECTION
+===================================================== -->
+
 <section class="hero">
 
     <div class="hero-overlay"></div>
+
 
     <div class="container hero-content text-white">
 
         <div class="row">
 
-            <div class="col-lg-8">
+            <div class="col-lg-9">
+
+
+                <!-- =================================================
+                     MAIN HEADING
+                ================================================== -->
 
                 <h1 class="display-3 fw-bold">
-                    Professional Excavation 
+
+                    Bower Company
+
                     <br>
-                    & Land Services
+
+                    Fire Weed Abatement
+
+                    <br>
+
+                    Service
+
                 </h1>
 
 
-                <p class="lead mt-4">
-                    Reliable excavation, grading, weed abatement,
-                    concrete breaking, and complete site preparation
-                    solutions for residential and commercial projects.
-                </p>
 
+                <!-- =================================================
+                     CONTACT INFORMATION
+                ================================================== -->
+
+                <div class="hero-contact mt-4 mb-4">
+
+
+                    <!-- PHONE NUMBER -->
+
+                    <div class="hero-contact-item mb-3">
+
+                        <span class="hero-contact-label">
+                            Phone:
+                        </span>
+
+                        <a
+                            href="tel:9162064059"
+                            class="hero-contact-link">
+
+                            916-206-4059
+
+                        </a>
+
+                    </div>
+
+
+
+                    <!-- EMAIL ADDRESS -->
+
+                    <div class="hero-contact-item">
+
+                        <span class="hero-contact-label">
+                            Email:
+                        </span>
+
+                        <a
+                            href="mailto:RBowerCompany@gmail.com"
+                            class="hero-contact-link">
+
+                            RBowerCompany@gmail.com
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     HERO BUTTONS
+                ================================================== -->
 
                 <div class="mt-4">
 
-                    <a href="/contact" 
-                       class="btn btn-warning btn-lg me-3">
+
+                    <a
+                        href="/contact"
+                        class="btn btn-warning btn-lg me-3">
 
                         Request A Quote
 
                     </a>
 
 
-                    <a href="/services" 
-                       class="btn btn-outline-light btn-lg">
+                    <a
+                        href="/services"
+                        class="btn btn-outline-light btn-lg">
 
                         View Services
 
                     </a>
 
+
                 </div>
+
 
             </div>
 
@@ -48,3 +120,111 @@
     </div>
 
 </section>
+
+
+
+<!-- =====================================================
+     HERO CONTACT STYLING
+===================================================== -->
+
+<style>
+
+    /* Main contact area */
+
+    .hero-contact {
+
+        display: inline-block;
+
+        font-size: 1.35rem;
+
+        font-weight: 700;
+
+    }
+
+
+    /* Each contact row */
+
+    .hero-contact-item {
+
+        width: fit-content;
+
+        padding-bottom: 6px;
+
+        border-bottom: 3px solid #ffc107;
+
+    }
+
+
+    /* Phone / Email labels */
+
+    .hero-contact-label {
+
+        font-weight: 800;
+
+        margin-right: 6px;
+
+        color: #ffffff;
+
+    }
+
+
+    /* Clickable phone and email */
+
+    .hero-contact-link {
+
+        color: #ffffff;
+
+        font-size: 1.35rem;
+
+        font-weight: 800;
+
+        text-decoration: none;
+
+        transition:
+            color 0.25s ease,
+            text-shadow 0.25s ease;
+
+    }
+
+
+    /* Hover effect */
+
+    .hero-contact-link:hover {
+
+        color: #ffc107;
+
+        text-shadow:
+            0 0 10px rgba(255, 193, 7, 0.35);
+
+    }
+
+
+    /* =================================================
+       MOBILE
+    ================================================== */
+
+    @media (max-width: 768px) {
+
+        .hero-contact {
+
+            font-size: 1.05rem;
+
+        }
+
+
+        .hero-contact-link {
+
+            font-size: 1.05rem;
+
+        }
+
+
+        .hero-contact-item {
+
+            max-width: 100%;
+
+        }
+
+    }
+
+</style>

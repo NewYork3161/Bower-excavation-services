@@ -1,0 +1,893 @@
+/* =====================================================
+   BIG BULL RON
+   ADMIN DASHBOARD
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    background: #f3f4f6;
+    color: #1f2937;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.ron-navbar {
+    width: 100%;
+    background: #212529;
+    color: white;
+
+    padding: 18px 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+
+    position: relative;
+    z-index: 1000;
+}
+
+.ron-navbar h1 {
+    margin: 0;
+
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   NAVBAR RIGHT SIDE
+===================================================== */
+
+.ron-navbar-right {
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.ron-navbar-status {
+    font-size: 14px;
+    color: #d1d5db;
+}
+
+
+/* =====================================================
+   HAMBURGER MENU
+===================================================== */
+
+.ron-menu {
+    position: relative;
+}
+
+
+/* =====================================================
+   HAMBURGER BUTTON
+===================================================== */
+
+.ron-menu-button {
+    width: 48px;
+    height: 48px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.ron-menu-button:hover {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.ron-menu-button:active {
+    transform: scale(0.95);
+}
+
+
+/* =====================================================
+   HAMBURGER LINES
+===================================================== */
+
+.ron-menu-line {
+    display: block;
+
+    width: 24px;
+    height: 3px;
+
+    background: white;
+
+    border-radius: 5px;
+}
+
+
+/* =====================================================
+   HAMBURGER DROPDOWN
+===================================================== */
+
+.ron-menu-dropdown {
+    display: none;
+
+    position: absolute;
+
+    top: 58px;
+    right: 0;
+
+    width: 240px;
+
+    padding: 8px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.20);
+
+    z-index: 2000;
+}
+
+
+/* =====================================================
+   OPEN DROPDOWN
+===================================================== */
+
+.ron-menu-dropdown.ron-menu-open {
+    display: block;
+}
+
+
+/* =====================================================
+   DROPDOWN LINKS
+===================================================== */
+
+.ron-menu-link {
+    display: block;
+
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border-radius: 7px;
+
+    color: #111827;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background 0.15s ease;
+}
+
+.ron-menu-link:hover {
+    background: #f3f4f6;
+
+    color: #111827;
+    text-decoration: none;
+}
+
+
+/* =====================================================
+   DELETED COUNT
+===================================================== */
+
+.ron-deleted-count {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 24px;
+    height: 24px;
+
+    margin-left: 7px;
+    padding: 0 7px;
+
+    background: #dc3545;
+    color: white;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   MAIN DASHBOARD
+===================================================== */
+
+.ron-dashboard {
+    width: 100%;
+    max-width: 1100px;
+
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+}
+
+
+/* =====================================================
+   DASHBOARD HEADER
+===================================================== */
+
+.ron-header {
+    margin-bottom: 30px;
+}
+
+.ron-header h2 {
+    margin: 0 0 8px;
+
+    font-size: 32px;
+}
+
+.ron-header p {
+    margin: 0;
+
+    color: #6b7280;
+    font-size: 16px;
+}
+
+
+/* =====================================================
+   REQUEST CARD
+===================================================== */
+
+.ron-card {
+    position: relative;
+
+    background: white;
+
+    border-radius: 12px;
+
+    padding: 28px;
+    margin-bottom: 25px;
+
+    border: 1px solid #e5e7eb;
+
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =====================================================
+   CUSTOMER NAME
+===================================================== */
+
+.ron-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.ron-card-header h2 {
+    margin: 0;
+
+    font-size: 25px;
+    color: #111827;
+}
+
+
+/* =====================================================
+   STATUS BADGES
+===================================================== */
+
+.ron-status {
+    display: inline-block;
+
+    padding: 7px 13px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.ron-status-new {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.ron-status-responded {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+
+/* =====================================================
+   CUSTOMER INFORMATION
+===================================================== */
+
+.ron-info-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px 30px;
+
+    margin-bottom: 25px;
+}
+
+.ron-info {
+    margin: 0;
+}
+
+.ron-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    color: #6b7280;
+}
+
+.ron-value {
+    font-size: 16px;
+    color: #111827;
+
+    word-break: break-word;
+}
+
+.ron-value a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.ron-value a:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   CUSTOMER MESSAGE
+===================================================== */
+
+.ron-message {
+    margin-top: 15px;
+    margin-bottom: 25px;
+
+    padding: 20px;
+
+    background: #f8f9fa;
+
+    border-left: 4px solid #ffc107;
+
+    border-radius: 6px;
+}
+
+.ron-message-label {
+    margin: 0 0 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    color: #6b7280;
+}
+
+.ron-message-text {
+    margin: 0;
+
+    font-size: 16px;
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+}
+
+
+/* =====================================================
+   RESPONSE SECTION
+===================================================== */
+
+.ron-response {
+    margin-top: 25px;
+    padding-top: 25px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.ron-response h3 {
+    margin: 0 0 15px;
+
+    font-size: 18px;
+}
+
+
+/* =====================================================
+   RESPONSE EMAIL
+===================================================== */
+
+.ron-response-email {
+    display: block;
+
+    margin-bottom: 18px;
+}
+
+.ron-response-email .ron-label {
+    display: block;
+
+    margin-bottom: 6px;
+}
+
+.ron-response-email .ron-value {
+    display: block;
+
+    font-size: 16px;
+    color: #111827;
+
+    word-break: break-word;
+}
+
+
+/* =====================================================
+   SEND RESPONSE BUTTON
+===================================================== */
+
+.ron-send-button {
+    display: block;
+
+    width: fit-content;
+
+    margin-top: 10px;
+
+    border: none;
+    border-radius: 7px;
+
+    padding: 12px 22px;
+
+    background: #ffc107;
+    color: #212529;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.ron-send-button:hover {
+    background: #e0a800;
+
+    color: #212529;
+    text-decoration: none;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ron-send-button:visited {
+    color: #212529;
+}
+
+
+/* =====================================================
+   RESPONDED MESSAGE
+===================================================== */
+
+.ron-completed {
+    margin-top: 20px;
+
+    padding: 15px 18px;
+
+    background: #d1e7dd;
+    color: #0f5132;
+
+    border-radius: 7px;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   CARD ACTIONS
+===================================================== */
+
+.ron-card-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 25px;
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+
+/* =====================================================
+   DELETE FORM
+===================================================== */
+
+.ron-delete-form {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =====================================================
+   LARGE ROUND DELETE BUTTON
+===================================================== */
+
+.ron-delete-button {
+    width: 58px;
+    height: 58px;
+
+    border: none;
+    border-radius: 50%;
+
+    padding: 0;
+
+    background: #dc3545;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.18);
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.ron-delete-button:hover {
+    background: #bb2d3b;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 12px rgba(0, 0, 0, 0.22);
+}
+
+.ron-delete-button:active {
+    transform: scale(0.95);
+}
+
+
+/* =====================================================
+   RECOVER DELETED PAGE
+===================================================== */
+
+.ron-recovery-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 30px;
+}
+
+
+/* =====================================================
+   BACK BUTTON
+===================================================== */
+
+.ron-back-button {
+    display: inline-block;
+
+    padding: 11px 18px;
+
+    background: #212529;
+    color: white;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.ron-back-button:hover {
+    background: #343a40;
+
+    color: white;
+
+    text-decoration: none;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   DELETED CARD
+===================================================== */
+
+.ron-deleted-card {
+    opacity: 0.92;
+
+    border-left: 5px solid #dc3545;
+}
+
+
+/* =====================================================
+   DELETED DATE
+===================================================== */
+
+.ron-deleted-date {
+    margin-top: 12px;
+
+    font-size: 13px;
+    color: #6b7280;
+}
+
+
+/* =====================================================
+   RESTORE BUTTON
+===================================================== */
+
+.ron-restore-button {
+    display: inline-block;
+
+    min-height: 48px;
+
+    padding: 13px 22px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #198754;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.ron-restore-button:hover {
+    background: #157347;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+/* =====================================================
+   EMPTY DASHBOARD
+===================================================== */
+
+.ron-empty {
+    background: white;
+
+    padding: 50px 25px;
+
+    text-align: center;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+.ron-empty h2 {
+    margin-top: 0;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .ron-navbar {
+        padding: 15px 18px;
+    }
+
+    .ron-navbar h1 {
+        font-size: 20px;
+    }
+
+
+    /* =================================================
+       NAVBAR RIGHT
+    ================================================= */
+
+    .ron-navbar-right {
+        gap: 8px;
+    }
+
+    .ron-navbar-status {
+        font-size: 12px;
+    }
+
+
+    /* =================================================
+       HAMBURGER
+    ================================================= */
+
+    .ron-menu-button {
+        width: 50px;
+        height: 50px;
+    }
+
+    .ron-menu-dropdown {
+        top: 58px;
+
+        width: 220px;
+    }
+
+
+    /* =================================================
+       DASHBOARD
+    ================================================= */
+
+    .ron-dashboard {
+        padding: 25px 12px 60px;
+    }
+
+    .ron-header h2 {
+        font-size: 26px;
+    }
+
+
+    /* =================================================
+       CARD
+    ================================================= */
+
+    .ron-card {
+        padding: 20px 16px;
+    }
+
+    .ron-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
+    .ron-card-header h2 {
+        font-size: 22px;
+    }
+
+
+    /* =================================================
+       INFORMATION
+    ================================================= */
+
+    .ron-info-grid {
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+    }
+
+
+    /* =================================================
+       RESPONSE
+    ================================================= */
+
+    .ron-response-email {
+        margin-bottom: 16px;
+    }
+
+    .ron-send-button {
+        display: block;
+
+        width: 100%;
+
+        margin-top: 12px;
+
+        padding: 14px;
+
+        text-align: center;
+    }
+
+
+    /* =================================================
+       DELETE BUTTON
+    ================================================= */
+
+    .ron-card-actions {
+        justify-content: flex-end;
+    }
+
+    .ron-delete-button {
+        width: 64px;
+        height: 64px;
+
+        font-size: 24px;
+    }
+
+
+    /* =================================================
+       RECOVERY PAGE
+    ================================================= */
+
+    .ron-recovery-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ron-back-button {
+        width: 100%;
+
+        padding: 14px;
+
+        text-align: center;
+    }
+
+    .ron-restore-button {
+        width: 100%;
+
+        min-height: 52px;
+    }
+
+}

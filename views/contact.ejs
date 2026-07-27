@@ -3,135 +3,429 @@
 <%- include("partials/navbar") %>
 
 
+<!-- =====================================================
+     CONTACT PAGE
+===================================================== -->
+
 <section class="container py-5">
+
+
+    <!-- =================================================
+         CONTACT HEADING
+    ================================================== -->
 
     <div class="text-center mb-5">
 
         <h1 class="display-4 fw-bold">
-            Contact Bauer Company Construction
+            Contact Bower Company
         </h1>
 
         <p class="lead">
-            Contact us for excavation, land clearing, weed abatement,
-            concrete breaking, and site preparation services.
+            Contact us for fire weed abatement, disking,
+            mulching, brush clearing, vegetation management,
+            stump removal, and property clearing services.
         </p>
 
     </div>
 
 
+    <!-- =================================================
+         SUCCESS MESSAGE
+    ================================================== -->
 
-    <div class="row">
+    <% if (typeof success !== "undefined" && success) { %>
 
-        <!-- Contact Information -->
+        <div class="alert alert-success text-center mb-4">
+
+            <strong>Thank you!</strong>
+
+            Your request has been received.
+
+            Bower Company will contact you as soon as possible.
+
+        </div>
+
+    <% } %>
+
+
+    <!-- =================================================
+         ERROR MESSAGE
+    ================================================== -->
+
+    <% if (typeof error !== "undefined" && error) { %>
+
+        <div class="alert alert-danger text-center mb-4">
+
+            <strong>Something went wrong.</strong>
+
+            Please try submitting your request again.
+
+        </div>
+
+    <% } %>
+
+
+
+    <div class="row g-5">
+
+
+        <!-- =================================================
+             CONTACT INFORMATION
+        ================================================== -->
+
         <div class="col-md-6">
 
-            <h2>
+            <h2 class="fw-bold mb-4">
                 Get In Touch
             </h2>
 
 
+            <!-- COMPANY -->
+
             <p>
-                <strong>Company:</strong><br>
-                Bauer Company Construction
+
+                <strong>
+                    Company:
+                </strong>
+
+                <br>
+
+                Bower Company
+
             </p>
 
 
+            <!-- ADDRESS -->
+
             <p>
-                <strong>Address:</strong><br>
-                2486 Warren Lane<br>
+
+                <strong>
+                    Address:
+                </strong>
+
+                <br>
+
+                2486 Warren Lane
+
+                <br>
+
                 Walnut Creek, California
+
             </p>
 
 
+            <!-- PHONE -->
+
             <p>
-                <strong>Phone:</strong><br>
+
+                <strong>
+                    Phone:
+                </strong>
+
+                <br>
+
                 <a href="tel:9162064059">
                     916-206-4059
                 </a>
+
             </p>
 
 
+            <!-- EMAIL -->
+
             <p>
-                <strong>Email:</strong><br>
-                <a href="mailto:rbauercompany@gmail.com">
-                    rbauercompany@gmail.com
+
+                <strong>
+                    Email:
+                </strong>
+
+                <br>
+
+                <a href="mailto:Rbowercompany@gmail.com">
+                    Rbowercompany@gmail.com
                 </a>
+
             </p>
 
+
+            <!-- SERVICE HOURS -->
 
             <p>
-                <strong>Service Hours:</strong><br>
-                Monday - Sunday<br>
-                5:00 AM - 9:00 PM
-            </p>
 
+                <strong>
+                    Service Hours:
+                </strong>
+
+                <br>
+
+                Monday - Sunday
+
+                <br>
+
+                5:00 AM - 9:00 PM
+
+            </p>
 
         </div>
 
 
 
-        <!-- Contact Form -->
+        <!-- =================================================
+             REQUEST A QUOTE
+        ================================================== -->
+
         <div class="col-md-6">
 
 
-            <h2>
+            <h2 class="fw-bold mb-4">
                 Request A Quote
             </h2>
 
 
-            <form action="/contact" method="POST">
+            <!-- =================================================
+                 CONTACT FORM
+            ================================================== -->
 
+            <form
+                action="/contact"
+                method="POST">
+
+
+                <!-- =============================================
+                     NAME
+                ============================================== -->
 
                 <div class="mb-3">
 
-                    <label class="form-label">
+                    <label
+                        for="name"
+                        class="form-label">
+
                         Name
+
                     </label>
 
-                    <input 
-                    type="text"
-                    class="form-control"
-                    name="name"
-                    required>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        class="form-control"
+                        autocomplete="name"
+                        required>
 
                 </div>
 
 
 
+                <!-- =============================================
+                     EMAIL
+                ============================================== -->
+
                 <div class="mb-3">
 
-                    <label class="form-label">
+                    <label
+                        for="email"
+                        class="form-label">
+
                         Email
+
                     </label>
 
-                    <input 
-                    type="email"
-                    class="form-control"
-                    name="email"
-                    required>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-control"
+                        autocomplete="email"
+                        required>
 
                 </div>
 
 
 
+                <!-- =============================================
+                     PHONE NUMBER
+                ============================================== -->
+
                 <div class="mb-3">
 
-                    <label class="form-label">
-                        Message
+                    <label
+                        for="phone"
+                        class="form-label">
+
+                        Phone Number
+
                     </label>
+
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        class="form-control"
+                        autocomplete="tel">
+
+                </div>
+
+
+
+                <!-- =============================================
+                     SERVICE NEEDED
+                ============================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="service"
+                        class="form-label">
+
+                        Service Needed
+
+                    </label>
+
+
+                    <select
+                        id="service"
+                        name="service"
+                        class="form-select">
+
+
+                        <option value="">
+                            Select a service
+                        </option>
+
+
+                        <option value="Fire Weed Abatement">
+                            Fire Weed Abatement
+                        </option>
+
+
+                        <option value="Disking">
+                            Disking
+                        </option>
+
+
+                        <option value="Mulching">
+                            Mulching
+                        </option>
+
+
+                        <option value="Brush Clearing">
+                            Brush Clearing
+                        </option>
+
+
+                        <option value="Stump Removal">
+                            Stump Removal
+                        </option>
+
+
+                        <option value="Property Clearing">
+                            Property Clearing
+                        </option>
+
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     PROPERTY ADDRESS
+                ============================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="property_address"
+                        class="form-label">
+
+                        Property / Job Address
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="property_address"
+                        name="property_address"
+                        class="form-control"
+                        autocomplete="street-address">
+
+                </div>
+
+
+
+                <!-- =============================================
+                     MESSAGE
+                ============================================== -->
+
+                <div class="mb-4">
+
+                    <label
+                        for="message"
+                        class="form-label">
+
+                        Tell Us About Your Project
+
+                    </label>
+
 
                     <textarea
-                    class="form-control"
-                    name="message"
-                    rows="5"
-                    required></textarea>
+                        id="message"
+                        name="message"
+                        class="form-control"
+                        rows="6"
+                        required></textarea>
 
                 </div>
 
 
 
-                <button class="btn btn-warning">
+                <!-- =============================================
+                     SPAM PROTECTION
+                ============================================== -->
+
+                <div
+                    style="
+                        position: absolute;
+                        left: -9999px;
+                    "
+                    aria-hidden="true">
+
+                    <label for="website">
+                        Leave this field blank
+                    </label>
+
+                    <input
+                        type="text"
+                        id="website"
+                        name="website"
+                        tabindex="-1"
+                        autocomplete="off">
+
+                </div>
+
+
+
+                <!-- =============================================
+                     SUBMIT BUTTON
+                ============================================== -->
+
+                <button
+                    type="submit"
+                    class="btn btn-warning btn-lg">
+
                     Send Request
+
                 </button>
 
 
@@ -146,6 +440,15 @@
 
 
 
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
 <%- include("partials/footer") %>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
 
 <%- include("partials/scripts") %>
