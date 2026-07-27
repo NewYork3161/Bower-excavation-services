@@ -1,620 +1,963 @@
 // ======================================================
 // BOWER COMPANY CONSTRUCTION
-// DATABASE UNIT TESTS
-// test/database.test.js
+// CONTACT REQUEST MODEL TESTS
+// test/contactRequest.test.js
+// MONGODB / MONGOOSE VERSION
 // ======================================================
 
 
 // ======================================================
-// IMPORT SQLITE
+// TEST ENVIRONMENT
 // ======================================================
 
-const sqlite3 =
-    require("sqlite3").verbose();
-
-
-// ======================================================
-// TEST DATABASE
-// ======================================================
-//
-// IMPORTANT:
-//
-// This database exists ONLY in memory.
-//
-// It does NOT use:
-//
-// database/bower_company.db
-//
-// Nothing in this test file should modify the real
-// Bower Company customer database.
-//
-// ======================================================
-
-let db;
+process.env.NODE_ENV = "test";
 
 
 // ======================================================
-// PROMISE HELPERS
+// IMPORT MONGOOSE
 // ======================================================
 
-function run(
-    sql,
-    params = []
-) {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            db.run(
-                sql,
-                params,
-                function (error) {
-
-                    if (error) {
-
-                        reject(error);
-
-                        return;
-
-                    }
+const mongoose =
+    require("mongoose");
 
 
-                    resolve({
+// ======================================================
+// IMPORT CONTACT REQUEST MODEL
+// ======================================================
 
-                        lastID:
-                            this.lastID,
+const ContactRequest =
+    require("../models/ContactRequest");
 
-                        changes:
-                            this.changes
 
-                    });
+// ======================================================
+// TEST OBJECT IDS
+// ======================================================
 
-                }
-            );
-
-        }
+const ACTIVE_REQUEST_ID =
+    new mongoose.Types.ObjectId(
+        "507f1f77bcf86cd799439011"
     );
 
-}
 
-
-function get(
-    sql,
-    params = []
-) {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            db.get(
-                sql,
-                params,
-                (error, row) => {
-
-                    if (error) {
-
-                        reject(error);
-
-                        return;
-
-                    }
-
-
-                    resolve(row);
-
-                }
-            );
-
-        }
+const SECOND_REQUEST_ID =
+    new mongoose.Types.ObjectId(
+        "507f1f77bcf86cd799439012"
     );
 
-}
-
-
-function all(
-    sql,
-    params = []
-) {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            db.all(
-                sql,
-                params,
-                (error, rows) => {
-
-                    if (error) {
-
-                        reject(error);
-
-                        return;
-
-                    }
-
-
-                    resolve(rows);
-
-                }
-            );
-
-        }
-    );
-
-}
-
 
 // ======================================================
-// DATABASE FUNCTIONS UNDER TEST
-// ======================================================
-//
-// These mirror the behavior of database.js while using
-// the safe in-memory test database.
-//
+// CONTACT REQUEST MODEL
 // ======================================================
 
+describe(
+    "ContactRequest Mongoose Model",
+    () => {
 
-// ======================================================
-// CREATE CONTACT REQUEST
-// ======================================================
 
-async function createContactRequest({
+        // ==================================================
+        // MODEL EXISTS
+        // ==================================================
 
-    name,
-    email,
-    phone,
-    service,
-    propertyAddress,
-    message
+        test(
+            "should create the ContactRequest Mongoose model",
+            () => {
 
-}) {
+                expect(
+                    ContactRequest
+                ).toBeDefined();
 
-    const result =
-        await run(
-            `
-                INSERT INTO contact_requests
-                (
-                    name,
-                    email,
-                    phone,
-                    service,
-                    property_address,
-                    message,
-                    responded,
-                    deleted
-                )
 
-                VALUES (?, ?, ?, ?, ?, ?, 0, 0)
-            `,
-            [
-                name,
-                email,
-                phone || null,
-                service || null,
-                propertyAddress || null,
-                message
-            ]
-        );
-
-
-    return {
-
-        id:
-            result.lastID,
-
-        name,
-
-        email,
-
-        phone,
-
-        service,
-
-        propertyAddress,
-
-        message,
-
-        responded:
-            false,
-
-        deleted:
-            false
-
-    };
-
-}
-
-
-// ======================================================
-// GET ALL ACTIVE CONTACT REQUESTS
-// ======================================================
-
-async function getAllContactRequests() {
-
-    return all(
-        `
-            SELECT *
-
-            FROM contact_requests
-
-            WHERE deleted = 0
-
-            ORDER BY
-                responded ASC,
-                created_at DESC,
-                id DESC
-        `
-    );
-
-}
-
-
-// ======================================================
-// GET CONTACT REQUEST BY ID
-// ======================================================
-
-async function getContactRequestById(id) {
-
-    return get(
-        `
-            SELECT *
-
-            FROM contact_requests
-
-            WHERE id = ?
-        `,
-        [id]
-    );
-
-}
-
-
-// ======================================================
-// MARK REQUEST RESPONDED
-// ======================================================
-
-async function markRequestResponded(
-    id,
-    response = null
-) {
-
-    const result =
-        await run(
-            `
-                UPDATE contact_requests
-
-                SET
-                    responded = 1,
-                    response = ?,
-                    responded_at = CURRENT_TIMESTAMP
-
-                WHERE id = ?
-
-                AND deleted = 0
-            `,
-            [
-                response,
-                id
-            ]
-        );
-
-
-    return {
-
-        id,
-
-        responded:
-            true,
-
-        response,
-
-        changes:
-            result.changes
-
-    };
-
-}
-
-
-// ======================================================
-// MARK REQUEST UNANSWERED
-// ======================================================
-
-async function markRequestUnanswered(id) {
-
-    const result =
-        await run(
-            `
-                UPDATE contact_requests
-
-                SET
-                    responded = 0,
-                    response = NULL,
-                    responded_at = NULL
-
-                WHERE id = ?
-
-                AND deleted = 0
-            `,
-            [id]
-        );
-
-
-    return {
-
-        id,
-
-        responded:
-            false,
-
-        changes:
-            result.changes
-
-    };
-
-}
-
-
-// ======================================================
-// SOFT DELETE CONTACT REQUEST
-// ======================================================
-
-async function deleteContactRequest(id) {
-
-    const result =
-        await run(
-            `
-                UPDATE contact_requests
-
-                SET
-                    deleted = 1,
-                    deleted_at = CURRENT_TIMESTAMP
-
-                WHERE id = ?
-
-                AND deleted = 0
-            `,
-            [id]
-        );
-
-
-    return {
-
-        id,
-
-        deleted:
-            result.changes > 0,
-
-        changes:
-            result.changes
-
-    };
-
-}
-
-
-// ======================================================
-// GET DELETED CONTACT REQUESTS
-// ======================================================
-
-async function getDeletedContactRequests() {
-
-    return all(
-        `
-            SELECT *
-
-            FROM contact_requests
-
-            WHERE deleted = 1
-
-            ORDER BY
-                deleted_at DESC,
-                id DESC
-        `
-    );
-
-}
-
-
-// ======================================================
-// RESTORE CONTACT REQUEST
-// ======================================================
-
-async function restoreContactRequest(id) {
-
-    const result =
-        await run(
-            `
-                UPDATE contact_requests
-
-                SET
-                    deleted = 0,
-                    deleted_at = NULL
-
-                WHERE id = ?
-
-                AND deleted = 1
-            `,
-            [id]
-        );
-
-
-    return {
-
-        id,
-
-        restored:
-            result.changes > 0,
-
-        changes:
-            result.changes
-
-    };
-
-}
-
-
-// ======================================================
-// GET UNANSWERED COUNT
-// ======================================================
-
-async function getUnansweredCount() {
-
-    const row =
-        await get(
-            `
-                SELECT COUNT(*) AS count
-
-                FROM contact_requests
-
-                WHERE responded = 0
-
-                AND deleted = 0
-            `
-        );
-
-
-    return row
-        ? row.count
-        : 0;
-
-}
-
-
-// ======================================================
-// GET DELETED COUNT
-// ======================================================
-
-async function getDeletedCount() {
-
-    const row =
-        await get(
-            `
-                SELECT COUNT(*) AS count
-
-                FROM contact_requests
-
-                WHERE deleted = 1
-            `
-        );
-
-
-    return row
-        ? row.count
-        : 0;
-
-}
-
-
-// ======================================================
-// CREATE TEST DATABASE BEFORE EACH TEST
-// ======================================================
-
-beforeEach(
-    async () => {
-
-        db =
-            new sqlite3.Database(
-                ":memory:"
-            );
-
-
-        await run(
-            `
-                CREATE TABLE contact_requests (
-
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-                    name TEXT NOT NULL,
-
-                    email TEXT NOT NULL,
-
-                    phone TEXT,
-
-                    service TEXT,
-
-                    property_address TEXT,
-
-                    message TEXT NOT NULL,
-
-                    responded INTEGER NOT NULL DEFAULT 0,
-
-                    response TEXT,
-
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-                    responded_at DATETIME,
-
-                    deleted INTEGER NOT NULL DEFAULT 0,
-
-                    deleted_at DATETIME
-
-                )
-            `
-        );
-
-    }
-);
-
-
-// ======================================================
-// CLOSE TEST DATABASE AFTER EACH TEST
-// ======================================================
-
-afterEach(
-    async () => {
-
-        if (!db) {
-
-            return;
-
-        }
-
-
-        await new Promise(
-            (resolve, reject) => {
-
-                db.close(
-                    (error) => {
-
-                        if (error) {
-
-                            reject(error);
-
-                            return;
-
-                        }
-
-
-                        resolve();
-
-                    }
+                expect(
+                    ContactRequest.modelName
+                ).toBe(
+                    "ContactRequest"
                 );
 
             }
         );
 
 
-        db = null;
+        // ==================================================
+        // COLLECTION EXISTS
+        // ==================================================
+
+        test(
+            "should have a MongoDB collection name",
+            () => {
+
+                expect(
+                    ContactRequest.collection
+                ).toBeDefined();
+
+
+                expect(
+                    ContactRequest.collection.name
+                ).toBeDefined();
+
+            }
+        );
 
     }
 );
 
 
 // ======================================================
-// CREATE CONTACT REQUEST TESTS
+// SCHEMA FIELDS
 // ======================================================
 
 describe(
-    "createContactRequest",
+    "ContactRequest Schema Fields",
+    () => {
+
+        const schema =
+            ContactRequest.schema;
+
+
+        test(
+            "should contain the name field",
+            () => {
+
+                expect(
+                    schema.path("name")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the email field",
+            () => {
+
+                expect(
+                    schema.path("email")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the phone field",
+            () => {
+
+                expect(
+                    schema.path("phone")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the service field",
+            () => {
+
+                expect(
+                    schema.path("service")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the property_address field",
+            () => {
+
+                expect(
+                    schema.path(
+                        "property_address"
+                    )
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the message field",
+            () => {
+
+                expect(
+                    schema.path("message")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the responded field",
+            () => {
+
+                expect(
+                    schema.path("responded")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the responded_at field",
+            () => {
+
+                expect(
+                    schema.path(
+                        "responded_at"
+                    )
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the deleted field",
+            () => {
+
+                expect(
+                    schema.path("deleted")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain the deleted_at field",
+            () => {
+
+                expect(
+                    schema.path(
+                        "deleted_at"
+                    )
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain createdAt from timestamps",
+            () => {
+
+                expect(
+                    schema.path("createdAt")
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should contain updatedAt from timestamps",
+            () => {
+
+                expect(
+                    schema.path("updatedAt")
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// REQUIRED FIELDS
+// ======================================================
+
+describe(
+    "ContactRequest Required Fields",
+    () => {
+
+        const schema =
+            ContactRequest.schema;
+
+
+        test(
+            "name should be required",
+            () => {
+
+                expect(
+                    schema.path("name")
+                        .options
+                        .required
+                ).toBe(true);
+
+            }
+        );
+
+
+        test(
+            "email should be required",
+            () => {
+
+                expect(
+                    schema.path("email")
+                        .options
+                        .required
+                ).toBe(true);
+
+            }
+        );
+
+
+        test(
+            "message should be required",
+            () => {
+
+                expect(
+                    schema.path("message")
+                        .options
+                        .required
+                ).toBe(true);
+
+            }
+        );
+
+
+        test(
+            "phone should not be required",
+            () => {
+
+                expect(
+                    schema.path("phone")
+                        .options
+                        .required
+                ).not.toBe(true);
+
+            }
+        );
+
+
+        test(
+            "service should not be required",
+            () => {
+
+                expect(
+                    schema.path("service")
+                        .options
+                        .required
+                ).not.toBe(true);
+
+            }
+        );
+
+
+        test(
+            "property_address should not be required",
+            () => {
+
+                expect(
+                    schema.path(
+                        "property_address"
+                    )
+                        .options
+                        .required
+                ).not.toBe(true);
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// DEFAULT VALUES
+// ======================================================
+
+describe(
+    "ContactRequest Default Values",
     () => {
 
         test(
-            "creates a new customer request",
+            "should use the correct defaults",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "Test Customer",
+
+                        email:
+                            "test@example.com",
+
+                        message:
+                            "Please contact me."
+
+                    });
+
+
+                expect(
+                    customer.phone
+                ).toBeNull();
+
+
+                expect(
+                    customer.service
+                ).toBeNull();
+
+
+                expect(
+                    customer.property_address
+                ).toBeNull();
+
+
+                expect(
+                    customer.responded
+                ).toBe(false);
+
+
+                expect(
+                    customer.responded_at
+                ).toBeNull();
+
+
+                expect(
+                    customer.deleted
+                ).toBe(false);
+
+
+                expect(
+                    customer.deleted_at
+                ).toBeNull();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// CUSTOMER NAME
+// ======================================================
+
+describe(
+    "Customer Name",
+    () => {
+
+        test(
+            "should trim the customer name",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "  John Smith  ",
+
+                        email:
+                            "john@example.com",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.name
+                ).toBe(
+                    "John Smith"
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject names over 150 characters",
             async () => {
 
                 const customer =
-                    await createContactRequest({
+                    new ContactRequest({
+
+                        name:
+                            "A".repeat(151),
+
+                        email:
+                            "john@example.com",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.name
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// CUSTOMER EMAIL
+// ======================================================
+
+describe(
+    "Customer Email",
+    () => {
+
+        test(
+            "should trim and lowercase email",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "  JOHN@EXAMPLE.COM  ",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.email
+                ).toBe(
+                    "john@example.com"
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject email over 254 characters",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            `${"a".repeat(250)}@example.com`,
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.email
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// PHONE
+// ======================================================
+
+describe(
+    "Customer Phone",
+    () => {
+
+        test(
+            "should trim phone number",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        phone:
+                            "  925-555-1234  ",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.phone
+                ).toBe(
+                    "925-555-1234"
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject phone numbers over 50 characters",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        phone:
+                            "1".repeat(51),
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.phone
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// SERVICE
+// ======================================================
+
+describe(
+    "Requested Service",
+    () => {
+
+        test(
+            "should trim requested service",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        service:
+                            "  Fire Weed Abatement  ",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.service
+                ).toBe(
+                    "Fire Weed Abatement"
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject service over 200 characters",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        service:
+                            "A".repeat(201),
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.service
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// PROPERTY ADDRESS
+// ======================================================
+
+describe(
+    "Property Address",
+    () => {
+
+        test(
+            "should use property_address",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        property_address:
+                            "123 Test Road",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.property_address
+                ).toBe(
+                    "123 Test Road"
+                );
+
+            }
+        );
+
+
+        test(
+            "should trim property_address",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        property_address:
+                            "  123 Test Road  ",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.property_address
+                ).toBe(
+                    "123 Test Road"
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject property_address over 500 characters",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        property_address:
+                            "A".repeat(501),
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.property_address
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// MESSAGE
+// ======================================================
+
+describe(
+    "Customer Message",
+    () => {
+
+        test(
+            "should trim customer message",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        message:
+                            "  Please clear my property.  "
+
+                    });
+
+
+                expect(
+                    customer.message
+                ).toBe(
+                    "Please clear my property."
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject messages over 10000 characters",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "John Smith",
+
+                        email:
+                            "john@example.com",
+
+                        message:
+                            "A".repeat(10001)
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.message
+                ).toBeDefined();
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// VALID CUSTOMER REQUEST
+// ======================================================
+
+describe(
+    "Valid Contact Request",
+    () => {
+
+        test(
+            "should validate a complete customer request",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        _id:
+                            ACTIVE_REQUEST_ID,
 
                         name:
                             "John Smith",
@@ -628,7 +971,7 @@ describe(
                         service:
                             "Disking",
 
-                        propertyAddress:
+                        property_address:
                             "123 Test Road",
 
                         message:
@@ -637,9 +980,13 @@ describe(
                     });
 
 
+                const error =
+                    customer.validateSync();
+
+
                 expect(
-                    customer.id
-                ).toBeDefined();
+                    error
+                ).toBeUndefined();
 
 
                 expect(
@@ -657,6 +1004,34 @@ describe(
 
 
                 expect(
+                    customer.phone
+                ).toBe(
+                    "9255551234"
+                );
+
+
+                expect(
+                    customer.service
+                ).toBe(
+                    "Disking"
+                );
+
+
+                expect(
+                    customer.property_address
+                ).toBe(
+                    "123 Test Road"
+                );
+
+
+                expect(
+                    customer.message
+                ).toBe(
+                    "I need my property disked."
+                );
+
+
+                expect(
                     customer.responded
                 ).toBe(false);
 
@@ -668,139 +1043,112 @@ describe(
             }
         );
 
-
-        test(
-            "stores optional values as null",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Jane Smith",
-
-                        email:
-                            "jane@example.com",
-
-                        phone:
-                            "",
-
-                        service:
-                            "",
-
-                        propertyAddress:
-                            "",
-
-                        message:
-                            "Please contact me."
-
-                    });
-
-
-                const storedCustomer =
-                    await getContactRequestById(
-                        customer.id
-                    );
-
-
-                expect(
-                    storedCustomer.phone
-                ).toBeNull();
-
-
-                expect(
-                    storedCustomer.service
-                ).toBeNull();
-
-
-                expect(
-                    storedCustomer.property_address
-                ).toBeNull();
-
-            }
-        );
-
     }
 );
 
 
 // ======================================================
-// GET CONTACT REQUEST BY ID TESTS
+// REQUIRED FIELD VALIDATION
 // ======================================================
 
 describe(
-    "getContactRequestById",
+    "Required Field Validation",
     () => {
 
         test(
-            "returns the correct customer",
-            async () => {
+            "should reject customer without name",
+            () => {
 
                 const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Michael Test",
+                    new ContactRequest({
 
                         email:
-                            "michael@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Fire Weed Abatement",
-
-                        propertyAddress:
-                            "456 Test Street",
+                            "customer@example.com",
 
                         message:
-                            "Test request."
+                            "Test message"
 
                     });
 
 
-                const result =
-                    await getContactRequestById(
-                        customer.id
-                    );
+                const error =
+                    customer.validateSync();
 
 
                 expect(
-                    result
+                    error
                 ).toBeDefined();
 
 
                 expect(
-                    result.id
-                ).toBe(
-                    customer.id
-                );
-
-
-                expect(
-                    result.name
-                ).toBe(
-                    "Michael Test"
-                );
+                    error.errors.name
+                ).toBeDefined();
 
             }
         );
 
 
         test(
-            "returns undefined when customer does not exist",
-            async () => {
+            "should reject customer without email",
+            () => {
 
-                const result =
-                    await getContactRequestById(
-                        999999
-                    );
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "Test Customer",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
 
 
                 expect(
-                    result
-                ).toBeUndefined();
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.email
+                ).toBeDefined();
+
+            }
+        );
+
+
+        test(
+            "should reject customer without message",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "Test Customer",
+
+                        email:
+                            "customer@example.com"
+
+                    });
+
+
+                const error =
+                    customer.validateSync();
+
+
+                expect(
+                    error
+                ).toBeDefined();
+
+
+                expect(
+                    error.errors.message
+                ).toBeDefined();
 
             }
         );
@@ -810,390 +1158,123 @@ describe(
 
 
 // ======================================================
-// GET ACTIVE REQUESTS TESTS
+// RESPONDED STATUS
 // ======================================================
 
 describe(
-    "getAllContactRequests",
+    "Responded Status",
     () => {
 
         test(
-            "returns active customer requests",
-            async () => {
-
-                await createContactRequest({
-
-                    name:
-                        "Customer One",
-
-                    email:
-                        "one@example.com",
-
-                    phone:
-                        null,
-
-                    service:
-                        "Disking",
-
-                    propertyAddress:
-                        null,
-
-                    message:
-                        "First request"
-
-                });
-
-
-                const customers =
-                    await getAllContactRequests();
-
-
-                expect(
-                    customers.length
-                ).toBe(1);
-
-
-                expect(
-                    customers[0].name
-                ).toBe(
-                    "Customer One"
-                );
-
-            }
-        );
-
-
-        test(
-            "does not return deleted customers",
-            async () => {
+            "new request should start unanswered",
+            () => {
 
                 const customer =
-                    await createContactRequest({
+                    new ContactRequest({
 
                         name:
-                            "Deleted Customer",
+                            "Test Customer",
 
                         email:
-                            "deleted@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Brush Clearing",
-
-                        propertyAddress:
-                            null,
+                            "customer@example.com",
 
                         message:
-                            "Delete this test."
+                            "Test message"
 
                     });
 
 
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const customers =
-                    await getAllContactRequests();
-
-
                 expect(
-                    customers.length
-                ).toBe(0);
-
-            }
-        );
-
-
-        test(
-            "puts unanswered customers before responded customers",
-            async () => {
-
-                const respondedCustomer =
-                    await createContactRequest({
-
-                        name:
-                            "Responded Customer",
-
-                        email:
-                            "responded@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Mulching",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Responded request"
-
-                    });
-
-
-                await markRequestResponded(
-                    respondedCustomer.id
-                );
-
-
-                await createContactRequest({
-
-                    name:
-                        "New Customer",
-
-                    email:
-                        "new@example.com",
-
-                    phone:
-                        null,
-
-                    service:
-                        "Disking",
-
-                    propertyAddress:
-                        null,
-
-                    message:
-                        "New request"
-
-                });
-
-
-                const customers =
-                    await getAllContactRequests();
-
-
-                expect(
-                    customers.length
-                ).toBe(2);
-
-
-                expect(
-                    customers[0].responded
-                ).toBe(0);
-
-
-                expect(
-                    customers[1].responded
-                ).toBe(1);
-
-            }
-        );
-
-    }
-);
-
-
-// ======================================================
-// RESPONDED TESTS
-// ======================================================
-
-describe(
-    "markRequestResponded",
-    () => {
-
-        test(
-            "marks a request as responded",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Response Test",
-
-                        email:
-                            "response@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Property Clearing",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Please respond."
-
-                    });
-
-
-                const result =
-                    await markRequestResponded(
-                        customer.id,
-                        "Customer contacted."
-                    );
-
-
-                expect(
-                    result.responded
-                ).toBe(true);
-
-
-                expect(
-                    result.changes
-                ).toBe(1);
-
-
-                const storedCustomer =
-                    await getContactRequestById(
-                        customer.id
-                    );
-
-
-                expect(
-                    storedCustomer.responded
-                ).toBe(1);
-
-
-                expect(
-                    storedCustomer.response
-                ).toBe(
-                    "Customer contacted."
-                );
-
-
-                expect(
-                    storedCustomer.responded_at
-                ).not.toBeNull();
-
-            }
-        );
-
-
-        test(
-            "does not mark a deleted request responded",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Deleted Response Test",
-
-                        email:
-                            "deletedresponse@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Test"
-
-                    });
-
-
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const result =
-                    await markRequestResponded(
-                        customer.id
-                    );
-
-
-                expect(
-                    result.changes
-                ).toBe(0);
-
-            }
-        );
-
-    }
-);
-
-
-// ======================================================
-// UNANSWERED TESTS
-// ======================================================
-
-describe(
-    "markRequestUnanswered",
-    () => {
-
-        test(
-            "reopens a responded request",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Reopen Test",
-
-                        email:
-                            "reopen@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Stump Removal",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Test request"
-
-                    });
-
-
-                await markRequestResponded(
-                    customer.id,
-                    "Previously answered"
-                );
-
-
-                const result =
-                    await markRequestUnanswered(
-                        customer.id
-                    );
-
-
-                expect(
-                    result.responded
+                    customer.responded
                 ).toBe(false);
 
 
                 expect(
-                    result.changes
-                ).toBe(1);
+                    customer.responded_at
+                ).toBeNull();
+
+            }
+        );
 
 
-                const storedCustomer =
-                    await getContactRequestById(
-                        customer.id
+        test(
+            "request can be marked responded",
+            () => {
+
+                const respondedDate =
+                    new Date(
+                        "2026-07-27T13:00:00.000Z"
                     );
 
 
-                expect(
-                    storedCustomer.responded
-                ).toBe(0);
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "Test Customer",
+
+                        email:
+                            "customer@example.com",
+
+                        message:
+                            "Test message",
+
+                        responded:
+                            true,
+
+                        responded_at:
+                            respondedDate
+
+                    });
 
 
                 expect(
-                    storedCustomer.response
-                ).toBeNull();
+                    customer.responded
+                ).toBe(true);
 
 
                 expect(
-                    storedCustomer.responded_at
+                    customer.responded_at
+                ).toEqual(
+                    respondedDate
+                );
+
+            }
+        );
+
+
+        test(
+            "request can be marked unanswered again",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "Test Customer",
+
+                        email:
+                            "customer@example.com",
+
+                        message:
+                            "Test message",
+
+                        responded:
+                            false,
+
+                        responded_at:
+                            null
+
+                    });
+
+
+                expect(
+                    customer.responded
+                ).toBe(false);
+
+
+                expect(
+                    customer.responded_at
                 ).toBeNull();
 
             }
@@ -1204,19 +1285,57 @@ describe(
 
 
 // ======================================================
-// SOFT DELETE TESTS
+// SOFT DELETE STATUS
 // ======================================================
 
 describe(
-    "deleteContactRequest",
+    "Soft Delete Status",
     () => {
 
         test(
-            "soft deletes a customer request",
-            async () => {
+            "new request should not be deleted",
+            () => {
 
                 const customer =
-                    await createContactRequest({
+                    new ContactRequest({
+
+                        name:
+                            "Test Customer",
+
+                        email:
+                            "customer@example.com",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.deleted
+                ).toBe(false);
+
+
+                expect(
+                    customer.deleted_at
+                ).toBeNull();
+
+            }
+        );
+
+
+        test(
+            "request can be soft deleted",
+            () => {
+
+                const deletedDate =
+                    new Date(
+                        "2026-07-27T14:00:00.000Z"
+                    );
+
+
+                const customer =
+                    new ContactRequest({
 
                         name:
                             "Delete Test",
@@ -1224,291 +1343,87 @@ describe(
                         email:
                             "delete@example.com",
 
-                        phone:
-                            null,
-
-                        service:
-                            "Brush Clearing",
-
-                        propertyAddress:
-                            null,
-
                         message:
-                            "Delete test"
+                            "Test message",
+
+                        deleted:
+                            true,
+
+                        deleted_at:
+                            deletedDate
 
                     });
 
 
-                const result =
-                    await deleteContactRequest(
-                        customer.id
-                    );
-
-
                 expect(
-                    result.deleted
+                    customer.deleted
                 ).toBe(true);
 
 
                 expect(
-                    result.changes
-                ).toBe(1);
-
-
-                const storedCustomer =
-                    await getContactRequestById(
-                        customer.id
-                    );
-
-
-                expect(
-                    storedCustomer
-                ).toBeDefined();
-
-
-                expect(
-                    storedCustomer.deleted
-                ).toBe(1);
-
-
-                expect(
-                    storedCustomer.deleted_at
-                ).not.toBeNull();
+                    customer.deleted_at
+                ).toEqual(
+                    deletedDate
+                );
 
             }
         );
 
 
         test(
-            "does not physically remove the database row",
-            async () => {
+            "soft deleted document still exists as a Mongoose document",
+            () => {
 
                 const customer =
-                    await createContactRequest({
+                    new ContactRequest({
+
+                        _id:
+                            SECOND_REQUEST_ID,
 
                         name:
                             "Soft Delete Test",
 
                         email:
-                            "softdelete@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
+                            "delete@example.com",
 
                         message:
-                            "Soft delete me"
+                            "Test message",
+
+                        deleted:
+                            true,
+
+                        deleted_at:
+                            new Date()
 
                     });
 
 
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const storedCustomer =
-                    await getContactRequestById(
-                        customer.id
-                    );
-
-
                 expect(
-                    storedCustomer
+                    customer
                 ).toBeDefined();
 
 
                 expect(
-                    storedCustomer.id
+                    customer._id.toString()
                 ).toBe(
-                    customer.id
+                    SECOND_REQUEST_ID.toString()
                 );
+
+
+                expect(
+                    customer.deleted
+                ).toBe(true);
 
             }
         );
 
 
         test(
-            "does not delete the same request twice",
-            async () => {
+            "request can be restored",
+            () => {
 
                 const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Double Delete Test",
-
-                        email:
-                            "double@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Test"
-
-                    });
-
-
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const secondDelete =
-                    await deleteContactRequest(
-                        customer.id
-                    );
-
-
-                expect(
-                    secondDelete.deleted
-                ).toBe(false);
-
-
-                expect(
-                    secondDelete.changes
-                ).toBe(0);
-
-            }
-        );
-
-    }
-);
-
-
-// ======================================================
-// DELETED REQUEST TESTS
-// ======================================================
-
-describe(
-    "getDeletedContactRequests",
-    () => {
-
-        test(
-            "returns deleted requests",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Recovery Customer",
-
-                        email:
-                            "recovery@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Fire Weed Abatement",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Recovery test"
-
-                    });
-
-
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const deletedCustomers =
-                    await getDeletedContactRequests();
-
-
-                expect(
-                    deletedCustomers.length
-                ).toBe(1);
-
-
-                expect(
-                    deletedCustomers[0].id
-                ).toBe(
-                    customer.id
-                );
-
-
-                expect(
-                    deletedCustomers[0].deleted
-                ).toBe(1);
-
-            }
-        );
-
-
-        test(
-            "does not return active requests",
-            async () => {
-
-                await createContactRequest({
-
-                    name:
-                        "Active Customer",
-
-                    email:
-                        "active@example.com",
-
-                    phone:
-                        null,
-
-                    service:
-                        "Disking",
-
-                    propertyAddress:
-                        null,
-
-                    message:
-                        "Active request"
-
-                });
-
-
-                const deletedCustomers =
-                    await getDeletedContactRequests();
-
-
-                expect(
-                    deletedCustomers.length
-                ).toBe(0);
-
-            }
-        );
-
-    }
-);
-
-
-// ======================================================
-// RESTORE TESTS
-// ======================================================
-
-describe(
-    "restoreContactRequest",
-    () => {
-
-        test(
-            "restores a deleted customer",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
+                    new ContactRequest({
 
                         name:
                             "Restore Test",
@@ -1516,121 +1431,75 @@ describe(
                         email:
                             "restore@example.com",
 
-                        phone:
-                            null,
-
-                        service:
-                            "Property Clearing",
-
-                        propertyAddress:
-                            null,
-
                         message:
-                            "Restore this request"
+                            "Test message",
+
+                        deleted:
+                            false,
+
+                        deleted_at:
+                            null
 
                     });
 
 
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const result =
-                    await restoreContactRequest(
-                        customer.id
-                    );
+                expect(
+                    customer.deleted
+                ).toBe(false);
 
 
                 expect(
-                    result.restored
-                ).toBe(true);
-
-
-                expect(
-                    result.changes
-                ).toBe(1);
-
-
-                const storedCustomer =
-                    await getContactRequestById(
-                        customer.id
-                    );
-
-
-                expect(
-                    storedCustomer.deleted
-                ).toBe(0);
-
-
-                expect(
-                    storedCustomer.deleted_at
+                    customer.deleted_at
                 ).toBeNull();
 
             }
         );
 
+    }
+);
+
+
+// ======================================================
+// MONGODB OBJECT ID
+// ======================================================
+
+describe(
+    "MongoDB ObjectId",
+    () => {
 
         test(
-            "restored customer returns to active requests",
-            async () => {
+            "should use a MongoDB ObjectId for _id",
+            () => {
 
                 const customer =
-                    await createContactRequest({
+                    new ContactRequest({
+
+                        _id:
+                            ACTIVE_REQUEST_ID,
 
                         name:
-                            "Return Test",
+                            "Object ID Test",
 
                         email:
-                            "return@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
+                            "objectid@example.com",
 
                         message:
-                            "Return test"
+                            "Test message"
 
                     });
 
 
-                await deleteContactRequest(
-                    customer.id
+                expect(
+                    customer._id
+                ).toBeInstanceOf(
+                    mongoose.Types.ObjectId
                 );
 
 
-                let activeCustomers =
-                    await getAllContactRequests();
-
-
                 expect(
-                    activeCustomers.length
-                ).toBe(0);
-
-
-                await restoreContactRequest(
-                    customer.id
-                );
-
-
-                activeCustomers =
-                    await getAllContactRequests();
-
-
-                expect(
-                    activeCustomers.length
-                ).toBe(1);
-
-
-                expect(
-                    activeCustomers[0].id
+                    customer._id.toString()
                 ).toBe(
-                    customer.id
+                    ACTIVE_REQUEST_ID.toString()
                 );
 
             }
@@ -1638,47 +1507,294 @@ describe(
 
 
         test(
-            "does not restore an active customer",
-            async () => {
+            "Mongoose should automatically create an ObjectId",
+            () => {
 
                 const customer =
-                    await createContactRequest({
+                    new ContactRequest({
 
                         name:
-                            "Already Active",
+                            "Automatic ID Test",
 
                         email:
-                            "alreadyactive@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Mulching",
-
-                        propertyAddress:
-                            null,
+                            "automatic@example.com",
 
                         message:
-                            "Test"
+                            "Test message"
 
                     });
 
 
-                const result =
-                    await restoreContactRequest(
-                        customer.id
+                expect(
+                    customer._id
+                ).toBeDefined();
+
+
+                expect(
+                    customer._id
+                ).toBeInstanceOf(
+                    mongoose.Types.ObjectId
+                );
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// ID VIRTUAL
+// ======================================================
+
+describe(
+    "Mongoose ID Virtual",
+    () => {
+
+        test(
+            "should expose id based on MongoDB _id",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        name:
+                            "ID Test",
+
+                        email:
+                            "id@example.com",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                expect(
+                    customer.id
+                ).toBe(
+                    ACTIVE_REQUEST_ID.toString()
+                );
+
+            }
+        );
+
+
+        test(
+            "toJSON should expose id",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        name:
+                            "JSON Test",
+
+                        email:
+                            "json@example.com",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const json =
+                    customer.toJSON();
+
+
+                expect(
+                    json.id
+                ).toBe(
+                    ACTIVE_REQUEST_ID.toString()
+                );
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// JSON / OBJECT CONVERSION
+// ======================================================
+
+describe(
+    "Mongoose Conversion",
+    () => {
+
+        test(
+            "should convert request to JSON",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        name:
+                            "JSON Customer",
+
+                        email:
+                            "json@example.com",
+
+                        property_address:
+                            "123 Mongo Road",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const json =
+                    customer.toJSON();
+
+
+                expect(
+                    json.name
+                ).toBe(
+                    "JSON Customer"
+                );
+
+
+                expect(
+                    json.email
+                ).toBe(
+                    "json@example.com"
+                );
+
+
+                expect(
+                    json.property_address
+                ).toBe(
+                    "123 Mongo Road"
+                );
+
+
+                expect(
+                    json.id
+                ).toBe(
+                    ACTIVE_REQUEST_ID.toString()
+                );
+
+            }
+        );
+
+
+        test(
+            "should convert request to plain object",
+            () => {
+
+                const customer =
+                    new ContactRequest({
+
+                        name:
+                            "Object Customer",
+
+                        email:
+                            "object@example.com",
+
+                        message:
+                            "Test message"
+
+                    });
+
+
+                const object =
+                    customer.toObject();
+
+
+                expect(
+                    object.name
+                ).toBe(
+                    "Object Customer"
+                );
+
+
+                expect(
+                    object.email
+                ).toBe(
+                    "object@example.com"
+                );
+
+            }
+        );
+
+    }
+);
+
+
+// ======================================================
+// SCHEMA INDEXES
+// ======================================================
+
+describe(
+    "ContactRequest MongoDB Indexes",
+    () => {
+
+        test(
+            "should define active/deleted request index",
+            () => {
+
+                const indexes =
+                    ContactRequest.schema.indexes();
+
+
+                const hasDeletedCreatedIndex =
+                    indexes.some(
+                        ([fields]) => {
+
+                            return (
+                                fields.deleted === 1 &&
+                                fields.createdAt === -1
+                            );
+
+                        }
                     );
 
 
                 expect(
-                    result.restored
-                ).toBe(false);
+                    hasDeletedCreatedIndex
+                ).toBe(true);
+
+            }
+        );
+
+
+        test(
+            "should define responded status index",
+            () => {
+
+                const indexes =
+                    ContactRequest.schema.indexes();
+
+
+                const hasRespondedIndex =
+                    indexes.some(
+                        ([fields]) => {
+
+                            return (
+                                fields.deleted === 1 &&
+                                fields.responded === 1 &&
+                                fields.createdAt === -1
+                            );
+
+                        }
+                    );
 
 
                 expect(
-                    result.changes
-                ).toBe(0);
+                    hasRespondedIndex
+                ).toBe(true);
 
             }
         );
@@ -1688,492 +1804,162 @@ describe(
 
 
 // ======================================================
-// UNANSWERED COUNT TESTS
+// FIELD TYPES
 // ======================================================
 
 describe(
-    "getUnansweredCount",
+    "ContactRequest Field Types",
     () => {
 
-        test(
-            "counts unanswered active requests",
-            async () => {
-
-                await createContactRequest({
-
-                    name:
-                        "Customer One",
-
-                    email:
-                        "one@example.com",
-
-                    phone:
-                        null,
-
-                    service:
-                        "Disking",
-
-                    propertyAddress:
-                        null,
-
-                    message:
-                        "One"
-
-                });
-
-
-                await createContactRequest({
-
-                    name:
-                        "Customer Two",
-
-                    email:
-                        "two@example.com",
-
-                    phone:
-                        null,
-
-                    service:
-                        "Mulching",
-
-                    propertyAddress:
-                        null,
-
-                    message:
-                        "Two"
-
-                });
-
-
-                const count =
-                    await getUnansweredCount();
-
-
-                expect(
-                    count
-                ).toBe(2);
-
-            }
-        );
+        const schema =
+            ContactRequest.schema;
 
 
         test(
-            "does not count responded requests",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Responded Count Test",
-
-                        email:
-                            "respondedcount@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Test"
-
-                    });
-
-
-                await markRequestResponded(
-                    customer.id
-                );
-
-
-                const count =
-                    await getUnansweredCount();
-
+            "name should be a String",
+            () => {
 
                 expect(
-                    count
-                ).toBe(0);
-
-            }
-        );
-
-
-        test(
-            "does not count deleted requests",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Deleted Count Test",
-
-                        email:
-                            "deletedcount@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Test"
-
-                    });
-
-
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                const count =
-                    await getUnansweredCount();
-
-
-                expect(
-                    count
-                ).toBe(0);
-
-            }
-        );
-
-    }
-);
-
-
-// ======================================================
-// DELETED COUNT TESTS
-// ======================================================
-
-describe(
-    "getDeletedCount",
-    () => {
-
-        test(
-            "counts deleted requests",
-            async () => {
-
-                const firstCustomer =
-                    await createContactRequest({
-
-                        name:
-                            "Deleted One",
-
-                        email:
-                            "deleted1@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Disking",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "One"
-
-                    });
-
-
-                const secondCustomer =
-                    await createContactRequest({
-
-                        name:
-                            "Deleted Two",
-
-                        email:
-                            "deleted2@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Brush Clearing",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Two"
-
-                    });
-
-
-                await deleteContactRequest(
-                    firstCustomer.id
-                );
-
-
-                await deleteContactRequest(
-                    secondCustomer.id
-                );
-
-
-                const count =
-                    await getDeletedCount();
-
-
-                expect(
-                    count
-                ).toBe(2);
-
-            }
-        );
-
-
-        test(
-            "does not count active requests",
-            async () => {
-
-                await createContactRequest({
-
-                    name:
-                        "Active Count Test",
-
-                    email:
-                        "activecount@example.com",
-
-                    phone:
-                        null,
-
-                    service:
-                        "Disking",
-
-                    propertyAddress:
-                        null,
-
-                    message:
-                        "Test"
-
-                });
-
-
-                const count =
-                    await getDeletedCount();
-
-
-                expect(
-                    count
-                ).toBe(0);
-
-            }
-        );
-
-
-        test(
-            "deleted count decreases after restore",
-            async () => {
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Restore Count Test",
-
-                        email:
-                            "restorecount@example.com",
-
-                        phone:
-                            null,
-
-                        service:
-                            "Fire Weed Abatement",
-
-                        propertyAddress:
-                            null,
-
-                        message:
-                            "Test"
-
-                    });
-
-
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                expect(
-                    await getDeletedCount()
-                ).toBe(1);
-
-
-                await restoreContactRequest(
-                    customer.id
-                );
-
-
-                expect(
-                    await getDeletedCount()
-                ).toBe(0);
-
-            }
-        );
-
-    }
-);
-
-
-// ======================================================
-// COMPLETE DELETE / RECOVERY WORKFLOW
-// ======================================================
-
-describe(
-    "Big Bull RON recovery workflow",
-    () => {
-
-        test(
-            "customer can be created, deleted, and restored",
-            async () => {
-
-                // ==========================================
-                // CREATE
-                // ==========================================
-
-                const customer =
-                    await createContactRequest({
-
-                        name:
-                            "Workflow Customer",
-
-                        email:
-                            "workflow@example.com",
-
-                        phone:
-                            "9255559999",
-
-                        service:
-                            "Fire Weed Abatement",
-
-                        propertyAddress:
-                            "789 Workflow Road",
-
-                        message:
-                            "Complete workflow test"
-
-                    });
-
-
-                // ==========================================
-                // CUSTOMER SHOULD BE ACTIVE
-                // ==========================================
-
-                let activeCustomers =
-                    await getAllContactRequests();
-
-
-                expect(
-                    activeCustomers.length
-                ).toBe(1);
-
-
-                // ==========================================
-                // DELETE
-                // ==========================================
-
-                await deleteContactRequest(
-                    customer.id
-                );
-
-
-                // ==========================================
-                // CUSTOMER SHOULD LEAVE ACTIVE DASHBOARD
-                // ==========================================
-
-                activeCustomers =
-                    await getAllContactRequests();
-
-
-                expect(
-                    activeCustomers.length
-                ).toBe(0);
-
-
-                // ==========================================
-                // CUSTOMER SHOULD APPEAR IN RECOVERY
-                // ==========================================
-
-                let deletedCustomers =
-                    await getDeletedContactRequests();
-
-
-                expect(
-                    deletedCustomers.length
-                ).toBe(1);
-
-
-                expect(
-                    deletedCustomers[0].id
+                    schema.path("name").instance
                 ).toBe(
-                    customer.id
+                    "String"
                 );
 
-
-                // ==========================================
-                // RESTORE
-                // ==========================================
-
-                await restoreContactRequest(
-                    customer.id
-                );
+            }
+        );
 
 
-                // ==========================================
-                // RECOVERY SHOULD NOW BE EMPTY
-                // ==========================================
-
-                deletedCustomers =
-                    await getDeletedContactRequests();
-
+        test(
+            "email should be a String",
+            () => {
 
                 expect(
-                    deletedCustomers.length
-                ).toBe(0);
-
-
-                // ==========================================
-                // CUSTOMER SHOULD RETURN TO DASHBOARD
-                // ==========================================
-
-                activeCustomers =
-                    await getAllContactRequests();
-
-
-                expect(
-                    activeCustomers.length
-                ).toBe(1);
-
-
-                expect(
-                    activeCustomers[0].id
+                    schema.path("email").instance
                 ).toBe(
-                    customer.id
+                    "String"
                 );
 
+            }
+        );
 
-                // ==========================================
-                // COUNTERS SHOULD ALSO BE CORRECT
-                // ==========================================
 
-                expect(
-                    await getDeletedCount()
-                ).toBe(0);
-
+        test(
+            "phone should be a String",
+            () => {
 
                 expect(
-                    await getUnansweredCount()
-                ).toBe(1);
+                    schema.path("phone").instance
+                ).toBe(
+                    "String"
+                );
+
+            }
+        );
+
+
+        test(
+            "service should be a String",
+            () => {
+
+                expect(
+                    schema.path("service").instance
+                ).toBe(
+                    "String"
+                );
+
+            }
+        );
+
+
+        test(
+            "property_address should be a String",
+            () => {
+
+                expect(
+                    schema.path(
+                        "property_address"
+                    ).instance
+                ).toBe(
+                    "String"
+                );
+
+            }
+        );
+
+
+        test(
+            "message should be a String",
+            () => {
+
+                expect(
+                    schema.path("message").instance
+                ).toBe(
+                    "String"
+                );
+
+            }
+        );
+
+
+        test(
+            "responded should be a Boolean",
+            () => {
+
+                expect(
+                    schema.path(
+                        "responded"
+                    ).instance
+                ).toBe(
+                    "Boolean"
+                );
+
+            }
+        );
+
+
+        test(
+            "responded_at should be a Date",
+            () => {
+
+                expect(
+                    schema.path(
+                        "responded_at"
+                    ).instance
+                ).toBe(
+                    "Date"
+                );
+
+            }
+        );
+
+
+        test(
+            "deleted should be a Boolean",
+            () => {
+
+                expect(
+                    schema.path(
+                        "deleted"
+                    ).instance
+                ).toBe(
+                    "Boolean"
+                );
+
+            }
+        );
+
+
+        test(
+            "deleted_at should be a Date",
+            () => {
+
+                expect(
+                    schema.path(
+                        "deleted_at"
+                    ).instance
+                ).toBe(
+                    "Date"
+                );
 
             }
         );

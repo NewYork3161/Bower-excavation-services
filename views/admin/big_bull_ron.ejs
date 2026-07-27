@@ -433,11 +433,7 @@
 
                             <div class="ron-value">
 
-                                <%=
-                                    submission.propertyAddress ||
-                                    submission.property_address ||
-                                    "Not provided"
-                                %>
+                                <%= submission.property_address || "Not provided" %>
 
                             </div>
 
@@ -546,6 +542,45 @@
 
 
                         <!-- =====================================
+                             RESPONDED / UNANSWERED
+                        ====================================== -->
+
+                        <% if (!submission.responded) { %>
+
+                            <form
+                                method="POST"
+                                action="/BigBullRON/responded/<%= submission.id %>">
+
+                                <button
+                                    type="submit"
+                                    class="ron-send-button">
+
+                                    Mark Responded
+
+                                </button>
+
+                            </form>
+
+                        <% } else { %>
+
+                            <form
+                                method="POST"
+                                action="/BigBullRON/unanswered/<%= submission.id %>">
+
+                                <button
+                                    type="submit"
+                                    class="ron-send-button">
+
+                                    Mark Unanswered
+
+                                </button>
+
+                            </form>
+
+                        <% } %>
+
+
+                        <!-- =====================================
                              DELETE CUSTOMER REQUEST
                         ====================================== -->
 
@@ -554,7 +589,6 @@
                             action="/BigBullRON/delete/<%= submission.id %>"
                             class="ron-delete-form"
                             onsubmit="return confirm('Move this customer request to Recover Deleted Files?');">
-
 
                             <button
                                 type="submit"
@@ -565,7 +599,6 @@
                                 ×
 
                             </button>
-
 
                         </form>
 
@@ -702,6 +735,7 @@
             );
 
         }
+
 
     </script>
 

@@ -338,7 +338,7 @@
 
                             <div class="ron-value">
 
-                                <%= submission.propertyAddress || submission.property_address || "Not provided" %>
+                                <%= submission.property_address || "Not provided" %>
 
                             </div>
 
@@ -383,7 +383,9 @@
 
                             <div class="ron-value">
 
-                                <%= submission.deleted_at %>
+                                <%= new Date(
+                                    submission.deleted_at
+                                ).toLocaleString() %>
 
                             </div>
 

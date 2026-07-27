@@ -12,26 +12,245 @@
 const express = require("express");
 const path = require("path");
 const methodOverride = require("method-override");
+const mongoose = require("mongoose");
 
 require("dotenv").config();
 
 
 // ======================================================
-// DATABASE
+// MONGODB / MONGOOSE
+// ======================================================
+//
+// MongoDB connection string is loaded from the existing .env file:
+//
+// MONGODB_URI=...
+//
+// The ContactRequest schema/model lives in:
+//
+// models/ContactRequest.js
+//
 // ======================================================
 
-const {
-    createContactRequest,
-    getAllContactRequests,
-    getContactRequestById,
-    markRequestResponded,
-    markRequestUnanswered,
-    deleteContactRequest,
-    getDeletedContactRequests,
-    restoreContactRequest,
-    getUnansweredCount,
-    getDeletedCount
-} = require("./database");
+const ContactRequest =
+    require("./models/ContactRequest");
+
+
+const MONGODB_URI =
+    process.env.MONGODB_URI;
+
+
+// ======================================================
+// CONNECT TO MONGODB
+// ======================================================
+
+async function connectDatabase() {
+
+    if (!MONGODB_URI) {
+
+        throw new Error(
+            "MONGODB_URI is missing from the environment."
+        );
+
+    }
+
+
+    if (mongoose.connection.readyState === 1) {
+
+        return mongoose.connection;
+
+    }
+
+
+    if (mongoose.connection.readyState === 2) {
+
+        return mongoose.connection;
+
+    }
+
+
+    await mongoose.connect(
+        MONGODB_URI
+    );
+
+
+    return mongoose.connection;
+
+}
+
+
+// ======================================================
+// CREATE CONTACT REQUEST
+// ======================================================
+
+async function createContactRequest(data) {
+
+    return ContactRequest.create(
+        data
+    );
+
+}
+
+
+// ======================================================
+// GET ACTIVE CONTACT REQUESTS
+// ======================================================
+
+async function getAllContactRequests() {
+
+    return ContactRequest
+        .find({
+            deleted: false
+        })
+        .sort({
+            createdAt: -1
+        });
+
+}
+
+
+// ======================================================
+// GET CONTACT REQUEST BY ID
+// ======================================================
+
+async function getContactRequestById(id) {
+
+    return ContactRequest.findById(
+        id
+    );
+
+}
+
+
+// ======================================================
+// MARK REQUEST RESPONDED
+// ======================================================
+
+async function markRequestResponded(id) {
+
+    return ContactRequest.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                responded: true,
+                responded_at: new Date()
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+}
+
+
+// ======================================================
+// MARK REQUEST UNANSWERED
+// ======================================================
+
+async function markRequestUnanswered(id) {
+
+    return ContactRequest.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                responded: false,
+                responded_at: null
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+}
+
+
+// ======================================================
+// SOFT DELETE CONTACT REQUEST
+// ======================================================
+
+async function deleteContactRequest(id) {
+
+    return ContactRequest.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                deleted: true,
+                deleted_at: new Date()
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+}
+
+
+// ======================================================
+// GET DELETED CONTACT REQUESTS
+// ======================================================
+
+async function getDeletedContactRequests() {
+
+    return ContactRequest
+        .find({
+            deleted: true
+        })
+        .sort({
+            deleted_at: -1
+        });
+
+}
+
+
+// ======================================================
+// RESTORE CONTACT REQUEST
+// ======================================================
+
+async function restoreContactRequest(id) {
+
+    return ContactRequest.findByIdAndUpdate(
+        id,
+        {
+            $set: {
+                deleted: false,
+                deleted_at: null
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+}
+
+
+// ======================================================
+// GET UNANSWERED COUNT
+// ======================================================
+
+async function getUnansweredCount() {
+
+    return ContactRequest.countDocuments({
+        deleted: false,
+        responded: false
+    });
+
+}
+
+
+// ======================================================
+// GET DELETED COUNT
+// ======================================================
+
+async function getDeletedCount() {
+
+    return ContactRequest.countDocuments({
+        deleted: true
+    });
+
+}
 
 
 // ======================================================
@@ -52,11 +271,18 @@ const PORT = process.env.PORT || 3000;
 // VIEW ENGINE
 // ======================================================
 
-app.set("view engine", "ejs");
+app.set(
+    "view engine",
+    "ejs"
+);
+
 
 app.set(
     "views",
-    path.join(__dirname, "views")
+    path.join(
+        __dirname,
+        "views"
+    )
 );
 
 
@@ -66,7 +292,10 @@ app.set(
 
 app.use(
     express.static(
-        path.join(__dirname, "public")
+        path.join(
+            __dirname,
+            "public"
+        )
     )
 );
 
@@ -81,6 +310,7 @@ app.use(
     })
 );
 
+
 app.use(
     express.json()
 );
@@ -91,7 +321,9 @@ app.use(
 // ======================================================
 
 app.use(
-    methodOverride("_method")
+    methodOverride(
+        "_method"
+    )
 );
 
 
@@ -103,7 +335,9 @@ app.get(
     "/",
     (req, res) => {
 
-        res.render("home");
+        res.render(
+            "home"
+        );
 
     }
 );
@@ -117,7 +351,9 @@ app.get(
     "/services",
     (req, res) => {
 
-        res.render("services");
+        res.render(
+            "services"
+        );
 
     }
 );
@@ -165,7 +401,7 @@ app.get(
 //      ↓
 // CONTACT FORM
 //      ↓
-// SQLITE DATABASE
+// MONGODB DATABASE
 //      ↓
 // BIG BULL RON
 //
@@ -215,6 +451,7 @@ app.post(
                     "Spam submission blocked."
                 );
 
+
                 return res.redirect(
                     "/contact?success=true"
                 );
@@ -236,6 +473,7 @@ app.post(
                     "Contact form missing required fields."
                 );
 
+
                 return res.redirect(
                     "/contact?error=true"
                 );
@@ -250,30 +488,35 @@ app.post(
             const cleanName =
                 name.trim();
 
+
             const cleanEmail =
                 email.trim();
+
 
             const cleanPhone =
                 phone
                     ? phone.trim()
                     : null;
 
+
             const cleanService =
                 service
                     ? service.trim()
                     : null;
+
 
             const cleanPropertyAddress =
                 property_address
                     ? property_address.trim()
                     : null;
 
+
             const cleanMessage =
                 message.trim();
 
 
             // ==========================================
-            // SAVE CUSTOMER TO SQLITE
+            // SAVE CUSTOMER TO MONGODB
             // ==========================================
 
             const savedRequest =
@@ -291,7 +534,7 @@ app.post(
                     service:
                         cleanService,
 
-                    propertyAddress:
+                    property_address:
                         cleanPropertyAddress,
 
                     message:
@@ -301,33 +544,42 @@ app.post(
 
 
             console.log("");
+
+
             console.log(
                 "======================================"
             );
+
 
             console.log(
                 " NEW CUSTOMER REQUEST"
             );
 
+
             console.log(
                 "======================================"
             );
+
 
             console.log(
                 ` Request ID: ${savedRequest.id}`
             );
 
+
             console.log(
                 ` Customer: ${cleanName}`
             );
+
 
             console.log(
                 ` Email: ${cleanEmail}`
             );
 
+
             console.log(
                 "======================================"
             );
+
 
             console.log("");
 
@@ -353,6 +605,7 @@ app.post(
             } else {
 
                 try {
+
 
                     const web3formsResponse =
                         await fetch(
@@ -475,23 +728,31 @@ app.post(
 
             console.error("");
 
+
             console.error(
                 "======================================"
             );
+
 
             console.error(
                 " CONTACT FORM ERROR"
             );
 
-            console.error(
-                "======================================"
-            );
-
-            console.error(error);
 
             console.error(
                 "======================================"
             );
+
+
+            console.error(
+                error
+            );
+
+
+            console.error(
+                "======================================"
+            );
+
 
             console.error("");
 
@@ -577,23 +838,31 @@ app.get(
 
             console.error("");
 
+
             console.error(
                 "======================================"
             );
+
 
             console.error(
                 " BIG BULL RON ERROR"
             );
 
-            console.error(
-                "======================================"
-            );
-
-            console.error(error);
 
             console.error(
                 "======================================"
             );
+
+
+            console.error(
+                error
+            );
+
+
+            console.error(
+                "======================================"
+            );
+
 
             console.error("");
 
@@ -611,15 +880,20 @@ app.get(
 
 
 // ======================================================
-// MARK CUSTOMER REQUEST RESPONDED
+// MONGODB OBJECT ID VALIDATION
 // ======================================================
-//
-// Gmail itself cannot tell this Express application
-// whether Ron actually clicked Send.
-//
-// Therefore this route is used when Ron manually confirms
-// that the customer has been answered.
-//
+
+function isValidRequestId(id) {
+
+    return mongoose.Types.ObjectId.isValid(
+        id
+    );
+
+}
+
+
+// ======================================================
+// MARK CUSTOMER REQUEST RESPONDED
 // ======================================================
 
 app.post(
@@ -628,11 +902,12 @@ app.post(
 
         try {
 
+
             const requestId =
-                Number(req.params.id);
+                req.params.id;
 
 
-            if (!Number.isInteger(requestId)) {
+            if (!isValidRequestId(requestId)) {
 
                 return res
                     .status(400)
@@ -675,6 +950,7 @@ app.post(
 
         } catch (error) {
 
+
             console.error(
                 "Error marking request responded:",
                 error
@@ -696,10 +972,6 @@ app.post(
 // ======================================================
 // MARK CUSTOMER REQUEST UNANSWERED
 // ======================================================
-//
-// This allows a request to be reopened if necessary.
-//
-// ======================================================
 
 app.post(
     "/BigBullRON/unanswered/:id",
@@ -707,11 +979,12 @@ app.post(
 
         try {
 
+
             const requestId =
-                Number(req.params.id);
+                req.params.id;
 
 
-            if (!Number.isInteger(requestId)) {
+            if (!isValidRequestId(requestId)) {
 
                 return res
                     .status(400)
@@ -754,6 +1027,7 @@ app.post(
 
         } catch (error) {
 
+
             console.error(
                 "Error reopening request:",
                 error
@@ -773,16 +1047,12 @@ app.post(
 
 
 // ======================================================
-// DELETE CUSTOMER REQUEST
+// SOFT DELETE CUSTOMER REQUEST
 // ======================================================
 //
-// IMPORTANT:
+// MongoDB document remains in the database.
 //
-// This is a SOFT DELETE.
-//
-// The SQLite row remains in the database.
-//
-// deleted = 1
+// deleted = true
 //
 // The customer request can therefore be restored from:
 //
@@ -796,11 +1066,12 @@ app.post(
 
         try {
 
+
             const requestId =
-                Number(req.params.id);
+                req.params.id;
 
 
-            if (!Number.isInteger(requestId)) {
+            if (!isValidRequestId(requestId)) {
 
                 return res
                     .status(400)
@@ -845,6 +1116,7 @@ app.post(
 
         } catch (error) {
 
+
             console.error(
                 "Error deleting customer request:",
                 error
@@ -865,16 +1137,6 @@ app.post(
 
 // ======================================================
 // RECOVER DELETED FILES PAGE
-// ======================================================
-//
-// LOCAL:
-//
-// http://localhost:3000/BigBullRON/recover
-//
-// EJS:
-//
-// views/admin/big_bull_ron_recover.ejs
-//
 // ======================================================
 
 app.get(
@@ -920,6 +1182,7 @@ app.get(
 
         } catch (error) {
 
+
             console.error(
                 "Big Bull Ron recovery page error:",
                 error
@@ -948,11 +1211,12 @@ app.post(
 
         try {
 
+
             const requestId =
-                Number(req.params.id);
+                req.params.id;
 
 
-            if (!Number.isInteger(requestId)) {
+            if (!isValidRequestId(requestId)) {
 
                 return res
                     .status(400)
@@ -997,6 +1261,7 @@ app.post(
 
         } catch (error) {
 
+
             console.error(
                 "Error restoring customer request:",
                 error
@@ -1016,20 +1281,18 @@ app.post(
 
 
 // ======================================================
-// IMPORTANT - GMAIL RESPONSE SYSTEM
+// GMAIL RESPONSE SYSTEM
 // ======================================================
 //
 // Big Bull RON does NOT send the response itself.
 //
-// The Send Response button in big_bull_ron.ejs opens
-// Gmail and inserts the customer's email address.
+// The Send Response button opens Gmail and inserts
+// the customer's email address.
 //
 // Gmail handles the outgoing email.
 //
-// The website therefore cannot automatically verify
-// that Gmail actually sent the message.
-//
-// The Responded state must be confirmed separately.
+// The Responded state is manually confirmed in
+// Big Bull RON.
 //
 // ======================================================
 
@@ -1058,92 +1321,142 @@ app.use(
 // ======================================================
 // START SERVER
 // ======================================================
+
+async function startServer() {
+
+    try {
+
+
+        // ==============================================
+        // CONNECT TO MONGODB BEFORE ACCEPTING REQUESTS
+        // ==============================================
+
+        await connectDatabase();
+
+
+        app.listen(
+            PORT,
+            () => {
+
+
+                console.log("");
+
+
+                console.log(
+                    "======================================"
+                );
+
+
+                console.log(
+                    " Bower Company Construction"
+                );
+
+
+                console.log(
+                    "======================================"
+                );
+
+
+                console.log(
+                    ` Server running on port ${PORT}`
+                );
+
+
+                console.log(
+                    " MongoDB connected"
+                );
+
+
+                console.log(
+                    ` Local: http://localhost:${PORT}`
+                );
+
+
+                console.log(
+                    ` Contact: http://localhost:${PORT}/contact`
+                );
+
+
+                console.log(
+                    ` Big Bull Ron: http://localhost:${PORT}/BigBullRON`
+                );
+
+
+                console.log(
+                    ` Recovery: http://localhost:${PORT}/BigBullRON/recover`
+                );
+
+
+                console.log(
+                    "======================================"
+                );
+
+
+                console.log("");
+
+
+            }
+        );
+
+
+    } catch (error) {
+
+
+        console.error("");
+
+
+        console.error(
+            "======================================"
+        );
+
+
+        console.error(
+            " SERVER STARTUP FAILED"
+        );
+
+
+        console.error(
+            "======================================"
+        );
+
+
+        console.error(
+            error
+        );
+
+
+        console.error(
+            "======================================"
+        );
+
+
+        process.exit(
+            1
+        );
+
+    }
+
+}
+
+
+// ======================================================
+// START ONLY WHEN RUN DIRECTLY
+// ======================================================
 //
-// IMPORTANT:
-//
-// When this file is started directly:
-//
-// npm start
-//
-// Node starts the real Express server.
-//
-// When Jest / Supertest imports this file:
-//
-// const app = require("../app");
-//
-// the server is NOT started automatically.
-// Supertest receives the Express application instead.
+// Jest / Supertest can import app.js without starting
+// the real HTTP server.
 //
 // ======================================================
 
 if (require.main === module) {
 
-    app.listen(
-        PORT,
-        () => {
-
-
-            console.log("");
-
-            console.log(
-                "======================================"
-            );
-
-            console.log(
-                " Bower Company Construction"
-            );
-
-            console.log(
-                "======================================"
-            );
-
-            console.log(
-                ` Server running on port ${PORT}`
-            );
-
-            console.log(
-                ` Local: http://localhost:${PORT}`
-            );
-
-            console.log(
-                ` Contact: http://localhost:${PORT}/contact`
-            );
-
-            console.log(
-                ` Big Bull Ron: http://localhost:${PORT}/BigBullRON`
-            );
-
-            console.log(
-                ` Recovery: http://localhost:${PORT}/BigBullRON/recover`
-            );
-
-            console.log(
-                "======================================"
-            );
-
-            console.log("");
-
-
-        }
-    );
+    startServer();
 
 }
 
 
 // ======================================================
 // EXPORT EXPRESS APPLICATION FOR UNIT TESTING
-// ======================================================
-//
-// This allows:
-//
-// test/app.test.js
-//
-// to use:
-//
-// const app = require("../app");
-//
-// without starting another server.
-//
 // ======================================================
 
 module.exports = app;

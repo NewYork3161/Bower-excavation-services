@@ -2,6 +2,7 @@
 // BOWER COMPANY CONSTRUCTION
 // APPLICATION ROUTE TESTS
 // test/app.test.js
+// MONGODB / MONGOOSE VERSION
 // ======================================================
 
 
@@ -20,52 +21,60 @@ const request = require("supertest");
 
 
 // ======================================================
-// MOCK DATABASE
+// TEST MONGODB OBJECT IDS
 // ======================================================
 //
-// IMPORTANT:
+// These are valid MongoDB ObjectId strings.
 //
-// app.js imports functions from:
+// No real MongoDB documents are created.
 //
-// ../database
+// The Mongoose ContactRequest model is mocked throughout
+// this test file so these tests NEVER modify the real
+// Bower Company MongoDB Atlas database.
 //
-// We mock those functions so these tests NEVER modify
-// the real Bower Company SQLite database.
+// ======================================================
+
+const ACTIVE_REQUEST_ID =
+    "507f1f77bcf86cd799439011";
+
+const DELETED_REQUEST_ID =
+    "507f1f77bcf86cd799439012";
+
+const MISSING_REQUEST_ID =
+    "507f1f77bcf86cd799439099";
+
+
+// ======================================================
+// MOCK CONTACT REQUEST MONGOOSE MODEL
+// ======================================================
+//
+// app.js now imports:
+//
+// ./models/ContactRequest
+//
+// There is NO database.js file anymore.
+//
+// These route tests mock the Mongoose model directly.
 //
 // ======================================================
 
 jest.mock(
-    "../database",
+    "../models/ContactRequest",
     () => ({
 
-        createContactRequest:
+        create:
             jest.fn(),
 
-        getAllContactRequests:
+        find:
             jest.fn(),
 
-        getContactRequestById:
+        findById:
             jest.fn(),
 
-        markRequestResponded:
+        findByIdAndUpdate:
             jest.fn(),
 
-        markRequestUnanswered:
-            jest.fn(),
-
-        deleteContactRequest:
-            jest.fn(),
-
-        getDeletedContactRequests:
-            jest.fn(),
-
-        restoreContactRequest:
-            jest.fn(),
-
-        getUnansweredCount:
-            jest.fn(),
-
-        getDeletedCount:
+        countDocuments:
             jest.fn()
 
     })
@@ -73,38 +82,70 @@ jest.mock(
 
 
 // ======================================================
-// IMPORT MOCKED DATABASE FUNCTIONS
+// IMPORT MOCKED MONGOOSE MODEL
 // ======================================================
 
-const {
-
-    createContactRequest,
-    getAllContactRequests,
-    getContactRequestById,
-    markRequestResponded,
-    markRequestUnanswered,
-    deleteContactRequest,
-    getDeletedContactRequests,
-    restoreContactRequest,
-    getUnansweredCount,
-    getDeletedCount
-
-} = require("../database");
+const ContactRequest =
+    require("../models/ContactRequest");
 
 
 // ======================================================
 // IMPORT EXPRESS APPLICATION
 // ======================================================
+
+const app =
+    require("../app");
+
+
+// ======================================================
+// MOCK FETCH / WEB3FORMS
+// ======================================================
 //
-// app.js will need:
+// Valid contact submissions also attempt to notify
+// Bower Company through Web3Forms.
 //
-// module.exports = app;
-//
-// before this test file can run.
+// Tests must never make a real external HTTP request.
 //
 // ======================================================
 
-const app = require("../app");
+global.fetch =
+    jest.fn();
+
+
+// ======================================================
+// MONGOOSE QUERY HELPERS
+// ======================================================
+//
+// app.js uses:
+//
+// ContactRequest.find(...).sort(...)
+//
+// These helpers make the mocked model behave like the
+// Mongoose query chain used by app.js.
+//
+// ======================================================
+
+function mockFindWithSort(result) {
+
+    const sort =
+        jest.fn()
+            .mockResolvedValue(
+                result
+            );
+
+
+    ContactRequest.find
+        .mockReturnValue({
+
+            sort:
+                sort
+
+        });
+
+
+    return sort;
+
+}
 
 
 // ======================================================
@@ -114,6 +155,24 @@ const app = require("../app");
 beforeEach(() => {
 
     jest.clearAllMocks();
+
+
+    global.fetch
+        .mockResolvedValue({
+
+            ok:
+                true,
+
+            json:
+                jest.fn()
+                    .mockResolvedValue({
+
+                        success:
+                            true
+
+                    })
+
+        });
 
 });
 
@@ -133,6 +192,7 @@ describe(
                 const response =
                     await request(app)
                         .get("/");
+
 
                 expect(
                     response.statusCode
@@ -161,9 +221,11 @@ describe(
                     await request(app)
                         .get("/services");
 
+
                 expect(
                     response.statusCode
                 ).toBe(200);
+
 
                 expect(
                     response.text
@@ -194,9 +256,11 @@ describe(
                     await request(app)
                         .get("/contact");
 
+
                 expect(
                     response.statusCode
                 ).toBe(200);
+
 
                 expect(
                     response.text
@@ -218,9 +282,11 @@ describe(
                             "/contact?success=true"
                         );
 
+
                 expect(
                     response.statusCode
                 ).toBe(200);
+
 
                 expect(
                     response.text
@@ -242,9 +308,11 @@ describe(
                             "/contact?error=true"
                         );
 
+
                 expect(
                     response.statusCode
                 ).toBe(200);
+
 
                 expect(
                     response.text
@@ -285,9 +353,11 @@ describe(
 
                         });
 
+
                 expect(
                     response.statusCode
                 ).toBe(302);
+
 
                 expect(
                     response.headers.location
@@ -295,8 +365,9 @@ describe(
                     "/contact?error=true"
                 );
 
+
                 expect(
-                    createContactRequest
+                    ContactRequest.create
                 ).not.toHaveBeenCalled();
 
             }
@@ -321,9 +392,11 @@ describe(
 
                         });
 
+
                 expect(
                     response.statusCode
                 ).toBe(302);
+
 
                 expect(
                     response.headers.location
@@ -331,8 +404,9 @@ describe(
                     "/contact?error=true"
                 );
 
+
                 expect(
-                    createContactRequest
+                    ContactRequest.create
                 ).not.toHaveBeenCalled();
 
             }
@@ -357,9 +431,11 @@ describe(
 
                         });
 
+
                 expect(
                     response.statusCode
                 ).toBe(302);
+
 
                 expect(
                     response.headers.location
@@ -367,8 +443,9 @@ describe(
                     "/contact?error=true"
                 );
 
+
                 expect(
-                    createContactRequest
+                    ContactRequest.create
                 ).not.toHaveBeenCalled();
 
             }
@@ -410,9 +487,11 @@ describe(
 
                         });
 
+
                 expect(
                     response.statusCode
                 ).toBe(302);
+
 
                 expect(
                     response.headers.location
@@ -420,8 +499,9 @@ describe(
                     "/contact?success=true"
                 );
 
+
                 expect(
-                    createContactRequest
+                    ContactRequest.create
                 ).not.toHaveBeenCalled();
 
             }
@@ -440,13 +520,17 @@ describe(
     () => {
 
         test(
-            "should save a valid customer request",
+            "should save a valid customer request to MongoDB",
             async () => {
 
-                createContactRequest
+                ContactRequest.create
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
 
                         name:
                             "John Smith",
@@ -460,7 +544,7 @@ describe(
                         service:
                             "Disking",
 
-                        propertyAddress:
+                        property_address:
                             "123 Test Road",
 
                         message:
@@ -469,8 +553,24 @@ describe(
                         responded:
                             false,
 
+                        responded_at:
+                            null,
+
                         deleted:
-                            false
+                            false,
+
+                        deleted_at:
+                            null,
+
+                        createdAt:
+                            new Date(
+                                "2026-07-27T12:00:00.000Z"
+                            ),
+
+                        updatedAt:
+                            new Date(
+                                "2026-07-27T12:00:00.000Z"
+                            )
 
                     });
 
@@ -518,12 +618,12 @@ describe(
 
 
                 expect(
-                    createContactRequest
+                    ContactRequest.create
                 ).toHaveBeenCalledTimes(1);
 
 
                 expect(
-                    createContactRequest
+                    ContactRequest.create
                 ).toHaveBeenCalledWith({
 
                     name:
@@ -538,11 +638,105 @@ describe(
                     service:
                         "Disking",
 
-                    propertyAddress:
+                    property_address:
                         "123 Test Road",
 
                     message:
                         "I need my property disked."
+
+                });
+
+            }
+        );
+
+
+        test(
+            "should save optional fields as null when not provided",
+            async () => {
+
+                ContactRequest.create
+                    .mockResolvedValue({
+
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
+
+                        name:
+                            "Jane Customer",
+
+                        email:
+                            "jane@example.com",
+
+                        phone:
+                            null,
+
+                        service:
+                            null,
+
+                        property_address:
+                            null,
+
+                        message:
+                            "Please contact me.",
+
+                        responded:
+                            false,
+
+                        deleted:
+                            false
+
+                    });
+
+
+                const response =
+                    await request(app)
+                        .post("/contact")
+                        .type("form")
+                        .send({
+
+                            name:
+                                "Jane Customer",
+
+                            email:
+                                "jane@example.com",
+
+                            message:
+                                "Please contact me.",
+
+                            website:
+                                ""
+
+                        });
+
+
+                expect(
+                    response.statusCode
+                ).toBe(302);
+
+
+                expect(
+                    ContactRequest.create
+                ).toHaveBeenCalledWith({
+
+                    name:
+                        "Jane Customer",
+
+                    email:
+                        "jane@example.com",
+
+                    phone:
+                        null,
+
+                    service:
+                        null,
+
+                    property_address:
+                        null,
+
+                    message:
+                        "Please contact me."
 
                 });
 
@@ -562,49 +756,60 @@ describe(
     () => {
 
         test(
-            "should load customer requests",
+            "should load active MongoDB customer requests",
             async () => {
 
-                getAllContactRequests
-                    .mockResolvedValue([
-                        {
+                mockFindWithSort([
+                    {
 
-                            id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
 
-                            name:
-                                "Test Customer",
+                        id:
+                            ACTIVE_REQUEST_ID,
 
-                            email:
-                                "customer@example.com",
+                        name:
+                            "Test Customer",
 
-                            phone:
-                                "9255551234",
+                        email:
+                            "customer@example.com",
 
-                            service:
-                                "Fire Weed Abatement",
+                        phone:
+                            "9255551234",
 
-                            property_address:
-                                "123 Test Road",
+                        service:
+                            "Fire Weed Abatement",
 
-                            message:
-                                "Please clear my property.",
+                        property_address:
+                            "123 Test Road",
 
-                            responded:
-                                0,
+                        message:
+                            "Please clear my property.",
 
-                            deleted:
-                                0
+                        responded:
+                            false,
 
-                        }
-                    ]);
+                        responded_at:
+                            null,
+
+                        deleted:
+                            false,
+
+                        deleted_at:
+                            null,
+
+                        createdAt:
+                            new Date(
+                                "2026-07-27T12:00:00.000Z"
+                            )
+
+                    }
+                ]);
 
 
-                getUnansweredCount
-                    .mockResolvedValue(1);
-
-
-                getDeletedCount
-                    .mockResolvedValue(0);
+                ContactRequest.countDocuments
+                    .mockResolvedValueOnce(1)
+                    .mockResolvedValueOnce(0);
 
 
                 const response =
@@ -634,18 +839,49 @@ describe(
 
 
                 expect(
-                    getAllContactRequests
-                ).toHaveBeenCalledTimes(1);
+                    response.text
+                ).toContain(
+                    "123 Test Road"
+                );
 
 
                 expect(
-                    getUnansweredCount
-                ).toHaveBeenCalledTimes(1);
+                    ContactRequest.find
+                ).toHaveBeenCalledWith({
+
+                    deleted:
+                        false
+
+                });
 
 
                 expect(
-                    getDeletedCount
-                ).toHaveBeenCalledTimes(1);
+                    ContactRequest.countDocuments
+                ).toHaveBeenNthCalledWith(
+                    1,
+                    {
+
+                        deleted:
+                            false,
+
+                        responded:
+                            false
+
+                    }
+                );
+
+
+                expect(
+                    ContactRequest.countDocuments
+                ).toHaveBeenNthCalledWith(
+                    2,
+                    {
+
+                        deleted:
+                            true
+
+                    }
+                );
 
             }
         );
@@ -655,16 +891,12 @@ describe(
             "should show empty state when there are no requests",
             async () => {
 
-                getAllContactRequests
-                    .mockResolvedValue([]);
+                mockFindWithSort([]);
 
 
-                getUnansweredCount
-                    .mockResolvedValue(0);
-
-
-                getDeletedCount
-                    .mockResolvedValue(0);
+                ContactRequest.countDocuments
+                    .mockResolvedValueOnce(0)
+                    .mockResolvedValueOnce(0);
 
 
                 const response =
@@ -704,30 +936,41 @@ describe(
             "should mark a customer request responded",
             async () => {
 
-                getContactRequestById
+                ContactRequest.findById
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
 
                         name:
                             "Test Customer",
 
+                        responded:
+                            false,
+
                         deleted:
-                            0
+                            false
 
                     });
 
 
-                markRequestResponded
+                ContactRequest.findByIdAndUpdate
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
 
                         responded:
                             true,
 
-                        changes:
-                            1
+                        responded_at:
+                            new Date()
 
                     });
 
@@ -735,7 +978,7 @@ describe(
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/responded/1"
+                            `/BigBullRON/responded/${ACTIVE_REQUEST_ID}`
                         );
 
 
@@ -752,21 +995,48 @@ describe(
 
 
                 expect(
-                    markRequestResponded
-                ).toHaveBeenCalledWith(1);
+                    ContactRequest.findById
+                ).toHaveBeenCalledWith(
+                    ACTIVE_REQUEST_ID
+                );
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
+                ).toHaveBeenCalledTimes(1);
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
+                ).toHaveBeenCalledWith(
+                    ACTIVE_REQUEST_ID,
+                    {
+                        $set: {
+                            responded:
+                                true,
+
+                            responded_at:
+                                expect.any(Date)
+                        }
+                    },
+                    {
+                        new:
+                            true
+                    }
+                );
 
             }
         );
 
 
         test(
-            "should reject an invalid request ID",
+            "should reject an invalid MongoDB request ID",
             async () => {
 
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/responded/not-a-number"
+                            "/BigBullRON/responded/not-a-valid-object-id"
                         );
 
 
@@ -776,7 +1046,81 @@ describe(
 
 
                 expect(
-                    markRequestResponded
+                    ContactRequest.findById
+                ).not.toHaveBeenCalled();
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
+                ).not.toHaveBeenCalled();
+
+            }
+        );
+
+
+        test(
+            "should return 404 when request does not exist",
+            async () => {
+
+                ContactRequest.findById
+                    .mockResolvedValue(
+                        null
+                    );
+
+
+                const response =
+                    await request(app)
+                        .post(
+                            `/BigBullRON/responded/${MISSING_REQUEST_ID}`
+                        );
+
+
+                expect(
+                    response.statusCode
+                ).toBe(404);
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
+                ).not.toHaveBeenCalled();
+
+            }
+        );
+
+
+        test(
+            "should return 404 when request is deleted",
+            async () => {
+
+                ContactRequest.findById
+                    .mockResolvedValue({
+
+                        _id:
+                            DELETED_REQUEST_ID,
+
+                        id:
+                            DELETED_REQUEST_ID,
+
+                        deleted:
+                            true
+
+                    });
+
+
+                const response =
+                    await request(app)
+                        .post(
+                            `/BigBullRON/responded/${DELETED_REQUEST_ID}`
+                        );
+
+
+                expect(
+                    response.statusCode
+                ).toBe(404);
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
                 ).not.toHaveBeenCalled();
 
             }
@@ -798,27 +1142,38 @@ describe(
             "should reopen a responded customer request",
             async () => {
 
-                getContactRequestById
+                ContactRequest.findById
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
+
+                        responded:
+                            true,
 
                         deleted:
-                            0
+                            false
 
                     });
 
 
-                markRequestUnanswered
+                ContactRequest.findByIdAndUpdate
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
 
                         responded:
                             false,
 
-                        changes:
-                            1
+                        responded_at:
+                            null
 
                     });
 
@@ -826,7 +1181,7 @@ describe(
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/unanswered/1"
+                            `/BigBullRON/unanswered/${ACTIVE_REQUEST_ID}`
                         );
 
 
@@ -843,8 +1198,77 @@ describe(
 
 
                 expect(
-                    markRequestUnanswered
-                ).toHaveBeenCalledWith(1);
+                    ContactRequest.findByIdAndUpdate
+                ).toHaveBeenCalledWith(
+                    ACTIVE_REQUEST_ID,
+                    {
+                        $set: {
+                            responded:
+                                false,
+
+                            responded_at:
+                                null
+                        }
+                    },
+                    {
+                        new:
+                            true
+                    }
+                );
+
+            }
+        );
+
+
+        test(
+            "should reject an invalid MongoDB request ID",
+            async () => {
+
+                const response =
+                    await request(app)
+                        .post(
+                            "/BigBullRON/unanswered/abc"
+                        );
+
+
+                expect(
+                    response.statusCode
+                ).toBe(400);
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
+                ).not.toHaveBeenCalled();
+
+            }
+        );
+
+
+        test(
+            "should return 404 when request does not exist",
+            async () => {
+
+                ContactRequest.findById
+                    .mockResolvedValue(
+                        null
+                    );
+
+
+                const response =
+                    await request(app)
+                        .post(
+                            `/BigBullRON/unanswered/${MISSING_REQUEST_ID}`
+                        );
+
+
+                expect(
+                    response.statusCode
+                ).toBe(404);
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
+                ).not.toHaveBeenCalled();
 
             }
         );
@@ -865,30 +1289,38 @@ describe(
             "should soft delete a customer request",
             async () => {
 
-                getContactRequestById
+                ContactRequest.findById
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
 
                         name:
                             "Test Customer",
 
                         deleted:
-                            0
+                            false
 
                     });
 
 
-                deleteContactRequest
+                ContactRequest.findByIdAndUpdate
                     .mockResolvedValue({
 
-                        id: 1,
+                        _id:
+                            ACTIVE_REQUEST_ID,
+
+                        id:
+                            ACTIVE_REQUEST_ID,
 
                         deleted:
                             true,
 
-                        changes:
-                            1
+                        deleted_at:
+                            new Date()
 
                     });
 
@@ -896,7 +1328,7 @@ describe(
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/delete/1"
+                            `/BigBullRON/delete/${ACTIVE_REQUEST_ID}`
                         );
 
 
@@ -913,8 +1345,23 @@ describe(
 
 
                 expect(
-                    deleteContactRequest
-                ).toHaveBeenCalledWith(1);
+                    ContactRequest.findByIdAndUpdate
+                ).toHaveBeenCalledWith(
+                    ACTIVE_REQUEST_ID,
+                    {
+                        $set: {
+                            deleted:
+                                true,
+
+                            deleted_at:
+                                expect.any(Date)
+                        }
+                    },
+                    {
+                        new:
+                            true
+                    }
+                );
 
             }
         );
@@ -924,16 +1371,16 @@ describe(
             "should return 404 when customer does not exist",
             async () => {
 
-                getContactRequestById
+                ContactRequest.findById
                     .mockResolvedValue(
-                        undefined
+                        null
                     );
 
 
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/delete/999"
+                            `/BigBullRON/delete/${MISSING_REQUEST_ID}`
                         );
 
 
@@ -943,7 +1390,7 @@ describe(
 
 
                 expect(
-                    deleteContactRequest
+                    ContactRequest.findByIdAndUpdate
                 ).not.toHaveBeenCalled();
 
             }
@@ -951,7 +1398,7 @@ describe(
 
 
         test(
-            "should reject invalid delete ID",
+            "should reject invalid MongoDB delete ID",
             async () => {
 
                 const response =
@@ -967,7 +1414,12 @@ describe(
 
 
                 expect(
-                    deleteContactRequest
+                    ContactRequest.findById
+                ).not.toHaveBeenCalled();
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
                 ).not.toHaveBeenCalled();
 
             }
@@ -986,47 +1438,64 @@ describe(
     () => {
 
         test(
-            "should load deleted customer requests",
+            "should load deleted MongoDB customer requests",
             async () => {
 
-                getDeletedContactRequests
-                    .mockResolvedValue([
-                        {
-
-                            id: 2,
-
-                            name:
-                                "Deleted Customer",
-
-                            email:
-                                "deleted@example.com",
-
-                            phone:
-                                "9255555678",
-
-                            service:
-                                "Brush Clearing",
-
-                            property_address:
-                                "456 Recovery Road",
-
-                            message:
-                                "Please clear the brush.",
-
-                            responded:
-                                0,
-
-                            deleted:
-                                1,
-
-                            deleted_at:
-                                "2026-07-27 12:00:00"
-
-                        }
-                    ]);
+                const deletedAt =
+                    new Date(
+                        "2026-07-27T12:00:00.000Z"
+                    );
 
 
-                getDeletedCount
+                mockFindWithSort([
+                    {
+
+                        _id:
+                            DELETED_REQUEST_ID,
+
+                        id:
+                            DELETED_REQUEST_ID,
+
+                        name:
+                            "Deleted Customer",
+
+                        email:
+                            "deleted@example.com",
+
+                        phone:
+                            "9255555678",
+
+                        service:
+                            "Brush Clearing",
+
+                        property_address:
+                            "456 Recovery Road",
+
+                        message:
+                            "Please clear the brush.",
+
+                        responded:
+                            false,
+
+                        responded_at:
+                            null,
+
+                        deleted:
+                            true,
+
+                        deleted_at:
+                            deletedAt,
+
+                        createdAt:
+                            new Date(
+                                "2026-07-27T11:00:00.000Z"
+                            )
+
+                    }
+                ]);
+
+
+                ContactRequest.countDocuments
                     .mockResolvedValue(1);
 
 
@@ -1064,13 +1533,30 @@ describe(
 
 
                 expect(
-                    getDeletedContactRequests
-                ).toHaveBeenCalledTimes(1);
+                    response.text
+                ).toContain(
+                    "456 Recovery Road"
+                );
 
 
                 expect(
-                    getDeletedCount
-                ).toHaveBeenCalledTimes(1);
+                    ContactRequest.find
+                ).toHaveBeenCalledWith({
+
+                    deleted:
+                        true
+
+                });
+
+
+                expect(
+                    ContactRequest.countDocuments
+                ).toHaveBeenCalledWith({
+
+                    deleted:
+                        true
+
+                });
 
             }
         );
@@ -1080,11 +1566,10 @@ describe(
             "should show empty recovery state",
             async () => {
 
-                getDeletedContactRequests
-                    .mockResolvedValue([]);
+                mockFindWithSort([]);
 
 
-                getDeletedCount
+                ContactRequest.countDocuments
                     .mockResolvedValue(0);
 
 
@@ -1125,30 +1610,41 @@ describe(
             "should restore a deleted customer request",
             async () => {
 
-                getContactRequestById
+                ContactRequest.findById
                     .mockResolvedValue({
 
-                        id: 2,
+                        _id:
+                            DELETED_REQUEST_ID,
+
+                        id:
+                            DELETED_REQUEST_ID,
 
                         name:
                             "Deleted Customer",
 
                         deleted:
-                            1
+                            true,
+
+                        deleted_at:
+                            new Date()
 
                     });
 
 
-                restoreContactRequest
+                ContactRequest.findByIdAndUpdate
                     .mockResolvedValue({
 
-                        id: 2,
+                        _id:
+                            DELETED_REQUEST_ID,
 
-                        restored:
-                            true,
+                        id:
+                            DELETED_REQUEST_ID,
 
-                        changes:
-                            1
+                        deleted:
+                            false,
+
+                        deleted_at:
+                            null
 
                     });
 
@@ -1156,7 +1652,7 @@ describe(
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/restore/2"
+                            `/BigBullRON/restore/${DELETED_REQUEST_ID}`
                         );
 
 
@@ -1173,8 +1669,23 @@ describe(
 
 
                 expect(
-                    restoreContactRequest
-                ).toHaveBeenCalledWith(2);
+                    ContactRequest.findByIdAndUpdate
+                ).toHaveBeenCalledWith(
+                    DELETED_REQUEST_ID,
+                    {
+                        $set: {
+                            deleted:
+                                false,
+
+                            deleted_at:
+                                null
+                        }
+                    },
+                    {
+                        new:
+                            true
+                    }
+                );
 
             }
         );
@@ -1184,16 +1695,16 @@ describe(
             "should return 404 when restore request does not exist",
             async () => {
 
-                getContactRequestById
+                ContactRequest.findById
                     .mockResolvedValue(
-                        undefined
+                        null
                     );
 
 
                 const response =
                     await request(app)
                         .post(
-                            "/BigBullRON/restore/999"
+                            `/BigBullRON/restore/${MISSING_REQUEST_ID}`
                         );
 
 
@@ -1203,7 +1714,7 @@ describe(
 
 
                 expect(
-                    restoreContactRequest
+                    ContactRequest.findByIdAndUpdate
                 ).not.toHaveBeenCalled();
 
             }
@@ -1211,7 +1722,7 @@ describe(
 
 
         test(
-            "should reject invalid restore ID",
+            "should reject invalid MongoDB restore ID",
             async () => {
 
                 const response =
@@ -1227,7 +1738,12 @@ describe(
 
 
                 expect(
-                    restoreContactRequest
+                    ContactRequest.findById
+                ).not.toHaveBeenCalled();
+
+
+                expect(
+                    ContactRequest.findByIdAndUpdate
                 ).not.toHaveBeenCalled();
 
             }
@@ -1238,23 +1754,33 @@ describe(
 
 
 // ======================================================
-// DATABASE ERROR HANDLING
+// MONGOOSE ERROR HANDLING
 // ======================================================
 
 describe(
-    "Database error handling",
+    "MongoDB / Mongoose error handling",
     () => {
 
         test(
-            "Big Bull RON should return 500 when database fails",
+            "Big Bull RON should return 500 when MongoDB query fails",
             async () => {
 
-                getAllContactRequests
-                    .mockRejectedValue(
-                        new Error(
-                            "Test database failure"
-                        )
-                    );
+                const sort =
+                    jest.fn()
+                        .mockRejectedValue(
+                            new Error(
+                                "Test MongoDB failure"
+                            )
+                        );
+
+
+                ContactRequest.find
+                    .mockReturnValue({
+
+                        sort:
+                            sort
+
+                    });
 
 
                 const response =
@@ -1280,15 +1806,25 @@ describe(
 
 
         test(
-            "recovery page should return 500 when database fails",
+            "recovery page should return 500 when MongoDB query fails",
             async () => {
 
-                getDeletedContactRequests
-                    .mockRejectedValue(
-                        new Error(
-                            "Test database failure"
-                        )
-                    );
+                const sort =
+                    jest.fn()
+                        .mockRejectedValue(
+                            new Error(
+                                "Test MongoDB failure"
+                            )
+                        );
+
+
+                ContactRequest.find
+                    .mockReturnValue({
+
+                        sort:
+                            sort
+
+                    });
 
 
                 const response =
@@ -1307,6 +1843,54 @@ describe(
                     response.text
                 ).toContain(
                     "Unable to load deleted customer requests."
+                );
+
+            }
+        );
+
+
+        test(
+            "contact form should redirect to error when MongoDB save fails",
+            async () => {
+
+                ContactRequest.create
+                    .mockRejectedValue(
+                        new Error(
+                            "Test MongoDB save failure"
+                        )
+                    );
+
+
+                const response =
+                    await request(app)
+                        .post("/contact")
+                        .type("form")
+                        .send({
+
+                            name:
+                                "Test Customer",
+
+                            email:
+                                "customer@example.com",
+
+                            message:
+                                "Please contact me.",
+
+                            website:
+                                ""
+
+                        });
+
+
+                expect(
+                    response.statusCode
+                ).toBe(302);
+
+
+                expect(
+                    response.headers.location
+                ).toBe(
+                    "/contact?error=true"
                 );
 
             }
