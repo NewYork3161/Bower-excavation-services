@@ -1,0 +1,30 @@
+GITHUB PUSH TRACKING LOG
+
+For anyone viewing this file for the first time:
+
+This text file is used only as a personal tracking system for GitHub pushes. Each time I make a new push to GitHub, I update the number in this file in sequence:
+
+1
+2
+3
+4
+5
+6
+7
+...and so on.
+
+The purpose is simply to help me keep track of each push and confirm that my latest changes successfully made it into the GitHub repository.
+
+For example, if I change the number in this file from 4 to 5 before making a push, I can check the GitHub repository afterward. If GitHub shows the updated number 5, I know that the newest version of this file—and the changes included with that push—reached the repository.
+
+IMPORTANT:
+
+This file has absolutely no effect on the website, application, database, server, or source code functionality.
+
+It is not a configuration file.
+It is not required by the application.
+It is not used by Node.js, Express, EJS, SQLite, Render, or GitHub.
+
+It is simply a personal GitHub push tracking log used for organization and verification.
+
+— Michael Anthony Clark
